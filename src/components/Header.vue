@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useAuth0 } from '@auth0/auth0-vue'
 import { useSidebar } from '../composables/useSidebar'
+
+const { loginWithRedirect, logout, isAuthenticated } = useAuth0()
+
+function logout_local() {
+  logout({ logoutParams: { returnTo: window.location.origin } })
+}
 
 const dropdownOpen = ref(false)
 const { isOpen } = useSidebar()
@@ -112,7 +119,7 @@ const { isOpen } = useSidebar()
               to="/"
               class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white"
             >
-              Log out
+              <a @click="logout_local">Sign out</a>
             </router-link>
           </div>
         </transition>

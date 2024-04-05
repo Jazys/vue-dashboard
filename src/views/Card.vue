@@ -1,3 +1,23 @@
+<script lang="ts">
+import { defineComponent, onMounted, ref } from 'vue'
+import ApiService from '../api/ApiService'
+import endpoints from '../api/endpoints'
+import type { User } from '../types/apiTypes'
+
+export default defineComponent({
+  setup() {
+    const users = ref<User[]>([])
+
+    onMounted(async () => {
+      users.value = await ApiService.get<User[]>(endpoints.users)
+      console.log(users.value.message)
+    })
+
+    return { users }
+  },
+})
+</script>
+
 <template>
   <div>
     <h3 class="text-3xl font-semibold text-gray-700">
