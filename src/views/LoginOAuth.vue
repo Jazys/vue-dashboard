@@ -1,37 +1,15 @@
 <script setup lang="ts">
 import { useAuth0 } from '@auth0/auth0-vue'
-import { createKobbleClient } from '@kobbleio/auth-spa-js'
+import kobbleClient from '../lib/kobbleClient'
 
-const kobbleClient = createKobbleClient({
-  domain: 'https://jjtest.portal.kobble.io',
-  clientId: 'clubq73m700aam6v9athetal1',
-  redirectUri: 'http://localhost:5173/oauth-redirect',
-})
+async function login() {
+  if (import.meta.env.VITE_ENABLE_AUTH_KOBBLE === 'true')
+    kobbleClient.loginWithRedirect()
 
-const { loginWithRedirect } = useAuth0()
-
-function login() {
-  kobbleClient.loginWithRedirect()
-}
-
-function refreshToken() {
-  kobbleClient.refreshAccessToken()
-}
-
-async function getAccessToken() {
-  const token = await kobbleClient.getAccessToken()
-}
-
-async function getIdToken() {
-  const token = await kobbleClient.getIdToken()
-}
-
-function logout() {
-  kobbleClient.logout()
-}
-
-async function getUser() {
-  const user = await kobbleClient.getUser()
+  if (import.meta.env.VITE_ENABLE_KOBBLE === 'true') {
+    const { loginWithRedirect } = useAuth0()
+    await loginWithRedirect()
+  }
 }
 </script>
 

@@ -9,16 +9,16 @@ import EmptyLayout from './components/EmptyLayout.vue'
 
 const app = createApp(App)
 
-app.use(
-  createAuth0({
-    domain: 'dev-qu2xg1uwk243o82u.us.auth0.com',
-    clientId: 'HbjRKXn14MvtSXVlODYeuh7CUwjcWs4Q',
+if (import.meta.env.VITE_ENABLE_AUTH0 === 'true') {
+  app.use(createAuth0({
+    domain: import.meta.env.VITE_ENABLE_AUTH0,
+    clientId: import.meta.env.VITE_CLIENT_ID_AUTH0,
     authorizationParams: {
-      redirect_uri: 'http://localhost:5173/oauth-redirect',
-      audience: 'https://dev-qu2xg1uwk243o82u.us.auth0.com/api/v2/',
+      redirect_uri: import.meta.env.VITE_REDIRECT_URL_AUTH0,
+      audience: import.meta.env.VITE_AUDIENCE_AUTH0,
     },
-  }),
-)
+  }))
+}
 
 app.component('DefaultLayout', DashboardLayout)
 app.component('EmptyLayout', EmptyLayout)

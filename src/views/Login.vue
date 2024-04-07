@@ -1,21 +1,6 @@
 <script setup lang="ts">
-import { useAuth0 } from '@auth0/auth0-vue'
-
-const { loginWithRedirect, logout } = useAuth0()
-
 async function handleLogin(event: any) {
   event.preventDefault() // Empêcher le comportement par défaut du formulaire
-
-  try {
-    await loginWithRedirect()
-  }
-  catch (error) {
-    console.error('Erreur lors de la tentative de connexion', error)
-  }
-}
-
-function logout_local() {
-  logout()
 }
 </script>
 

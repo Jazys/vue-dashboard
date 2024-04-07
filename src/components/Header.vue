@@ -2,11 +2,18 @@
 import { ref } from 'vue'
 import { useAuth0 } from '@auth0/auth0-vue'
 import { useSidebar } from '../composables/useSidebar'
+import kobbleClient from '../lib/kobbleClient'
 
-const { loginWithRedirect, logout, isAuthenticated } = useAuth0()
+async function logout() {
+  localStorage.removeItem('bearer-token')
+  console.log('logou')
+  if (import.meta.env.VITE_ENABLE_AUTH_KOBBLE === 'true')
+    await kobbleClient.logout()
 
-function logout_local() {
-  logout({ logoutParams: { returnTo: window.location.origin } })
+  if (import.meta.env.VITE_ENABLE_AUTH0 === 'true') {
+    const { logout, isAuthenticated } = useAuth0()
+    logout({ logoutParams: { returnTo: window.location.origin } })
+  }
 }
 
 const dropdownOpen = ref(false)
@@ -115,12 +122,8 @@ const { isOpen } = useSidebar()
               href="#"
               class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white"
             >Products</a>
-            <router-link
-              to="/"
-              class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white"
-            >
-              <a @click="logout_local">Sign out</a>
-            </router-link>
+
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-600 hover:text-white" @click="logout">Sign out</a>
           </div>
         </transition>
       </div>

@@ -70,6 +70,7 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   if (to.path !== '/oauth-redirect') {
     const token = localStorage.getItem('bearer-token')
+    console.log(token)
 
     if (token) {
       next()
