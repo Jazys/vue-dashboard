@@ -17,6 +17,7 @@
     "@tailwindcss/typography": "^0.5.9",
     "@tailwindcss/ui": "^0.7.2",
     "axios": "^1.6.8",
+    "vercel": "^33.7.0",
     "vue": "^3.3.4",
     "vue-router": "4.2.2"
   },

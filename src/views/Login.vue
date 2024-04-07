@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import { useAuth0 } from '@auth0/auth0-vue'
 
-const { loginWithRedirect, logout, isAuthenticated } = useAuth0()
+const { loginWithRedirect, logout } = useAuth0()
+
+async function handleLogin(event: any) {
+  event.preventDefault() // Empêcher le comportement par défaut du formulaire
+
+  try {
+    await loginWithRedirect()
+  }
+  catch (error) {
+    console.error('Erreur lors de la tentative de connexion', error)
+  }
+}
 
 function logout_local() {
-  logout({ logoutParams: { returnTo: 'http://localhost:5173/oauth-redirect' } })
+  logout()
 }
 </script>
 
@@ -34,11 +45,10 @@ function logout_local() {
         <span class="text-2xl font-semibold text-gray-700">V-Dashboard</span>
       </div>
 
-      <form class="mt-4" @submit.prevent="loginWithRedirect">
+      <form class="mt-4" @submit.prevent="handleLogin">
         <label class="block">
           <span class="text-sm text-gray-700">Email</span>
           <input
-            v-model="email"
             type="email"
             class="block w-full mt-1 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
           >
@@ -47,7 +57,6 @@ function logout_local() {
         <label class="block mt-3">
           <span class="text-sm text-gray-700">Password</span>
           <input
-            v-model="password"
             type="password"
             class="block w-full mt-1 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
           >

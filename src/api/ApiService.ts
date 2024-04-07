@@ -18,10 +18,10 @@ class ApiService {
   }
 
   private initializeRequestInterceptor() {
-    this.axios.interceptors.request.use((config: { headers: { Authorization: string } }) => {
+    this.axios.interceptors.request.use((config: any) => {
+      config.headers = config.headers || {}
       // Ajoutez votre logique pour obtenir le token ici
       const token = localStorage.getItem('bearer-token')
-      console.log(token)
       if (token)
         config.headers.Authorization = `Bearer ${token}`
 

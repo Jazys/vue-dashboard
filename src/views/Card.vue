@@ -10,7 +10,6 @@ export default defineComponent({
 
     onMounted(async () => {
       users.value = await ApiService.get<User[]>(endpoints.users)
-      console.log(users.value.message)
     })
 
     return { users }
