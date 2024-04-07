@@ -1,10 +1,19 @@
 <script lang="ts">
-import { useAuth0 } from '@auth0/auth0-vue'
+import { createKobbleClient } from '@kobbleio/auth-spa-js'
+
+const kobbleClient = createKobbleClient({
+  domain: 'https://jjtest.portal.kobble.io',
+  clientId: 'clubq73m700aam6v9athetal1',
+  redirectUri: 'http://localhost:5173/oauth-redirect',
+})
 
 export default {
   name: 'OAuthRedirect',
   async created() {
-    const { getAccessTokenSilently } = useAuth0()
+    const redirectResult = await kobbleClient.handleRedirectCallback()
+    const user = await kobbleClient.getUser()
+    console.log(await kobbleClient.getAccessToken())
+    /* const { getAccessTokenSilently } = useAuth0()
     const token = await getAccessTokenSilently()
 
     if (token) {
@@ -13,7 +22,7 @@ export default {
     }
     else {
       this.$router.push('/login')
-    }
+    } */
   },
 }
 </script>
