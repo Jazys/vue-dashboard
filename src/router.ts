@@ -10,6 +10,8 @@ import Modal from './views/Modal.vue'
 import Card from './views/Card.vue'
 import Blank from './views/Blank.vue'
 import OAuthRedirect from './views/OAuthRedirect.vue'
+import Profile from './views/Profile.vue'
+import Contact from './views/Contact.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -58,6 +60,16 @@ const routes: RouteRecordRaw[] = [
     path: '/blank',
     name: 'Blank',
     component: Blank,
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
+  },
+  {
+    path: '/contact',
+    name: 'Contact',
+    component: Contact,
   },
 ]
 
