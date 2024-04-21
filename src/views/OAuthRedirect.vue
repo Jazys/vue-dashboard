@@ -11,6 +11,8 @@ export default {
       await kobbleClient.handleRedirectCallback()
       await kobbleClient.getUser()
       token = await kobbleClient.getAccessToken()
+      console.log(token)
+      console.log(await kobbleClient.getIdToken())
     }
 
     if (import.meta.env.VITE_ENABLE_AUTH0 === 'true') {

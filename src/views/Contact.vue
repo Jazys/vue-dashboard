@@ -1,26 +1,104 @@
 <script setup lang="ts">
-import { useTableData } from '../composables/useTableData'
+import axios from 'axios'
+import { onMounted, ref, watch } from 'vue'
+import ApiService from '../api/ApiService'
+import endpoints from '../api/endpoints'
+import type { Contact } from '../types/apiTypes'
 
-const {
-  simpleTableData,
-  paginatedTableData,
-  wideTableData,
-} = useTableData()
+const allContacts = ref<Contact[]>([])
+const displayedContacts = ref<Contact[]>([])
+const loading = ref(true)
+const currentPage = ref(1)
+const pageSize = ref(10)
+const totalEntries = ref(0)
+const searchQuery = ref('')
+
+onMounted(async () => {
+  loading.value = true
+  try {
+    const response = await ApiService.get<Contact[]>(endpoints.contacts, { user: '01ff5b2e-65d4-4199-a1cf-fedb3090a9f5' })
+    allContacts.value = response
+    totalEntries.value = response.length
+    updateDisplayedContacts()
+  }
+  catch (error) {
+    console.error('Failed to fetch contacts:', error)
+  }
+  loading.value = false
+})
+
+watch([pageSize, searchQuery, currentPage], () => {
+  updateDisplayedContacts()
+})
+
+function updateDisplayedContacts() {
+  const filteredContacts = allContacts.value.filter(contact =>
+    contact.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
+  )
+  console.log(filteredContacts)
+  totalEntries.value = filteredContacts.length
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  displayedContacts.value = filteredContacts.slice(start, end)
+}
+
+function nextPage() {
+  if (currentPage.value * pageSize.value < totalEntries.value) {
+    currentPage.value++
+    updateDisplayedContacts()
+  }
+}
+
+function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--
+    updateDisplayedContacts()
+  }
+}
+
+async function activateUser(id: number) {
+  try {
+    const response = await axios.post('/api/user/activate', { id })
+    console.log('Utilisateur activé', response.data)
+    // Mettre à jour les données de l'utilisateur ou rafraîchir les données ici
+  }
+  catch (error) {
+    console.error('Erreur lors de lactivation', error)
+  }
+}
+
+async function deactivateUser(id: number) {
+  try {
+    const response = await axios.post('/api/user/deactivate', { id })
+    console.log('Utilisateur désactivé', response.data)
+    // Mettre à jour les données de l'utilisateur ou rafraîchir les données ici
+  }
+  catch (error) {
+    console.error('Erreur lors de la désactivation', error)
+  }
+}
 </script>
 
 <template>
-  <div>
+  <div v-if="!loading">
     <div class="mt-8">
       <div class="mt-6">
         <div class="flex flex-col mt-3 sm:flex-row sm:justify-between">
           <div class="flex">
             <div class="relative">
               <select
+                v-model="pageSize"
                 class="block w-full h-full px-4 py-2 pr-8 leading-tight text-gray-700 bg-white border border-gray-400 rounded-l appearance-none focus:outline-none focus:bg-white focus:border-gray-500"
               >
-                <option>5</option>
-                <option>10</option>
-                <option>20</option>
+                <option value="5">
+                  5
+                </option>
+                <option value="10">
+                  10
+                </option>
+                <option value="20">
+                  20
+                </option>
               </select>
 
               <div
@@ -43,8 +121,6 @@ const {
                 class="block w-full h-full px-4 py-2 pr-8 leading-tight text-gray-700 bg-white border-t border-b border-r border-gray-400 rounded-r appearance-none sm:rounded-r-none sm:border-r-0 focus:outline-none focus:border-l focus:border-r focus:bg-white focus:border-gray-500"
               >
                 <option>All</option>
-                <option>Active</option>
-                <option>Inactive</option>
               </select>
 
               <div
@@ -76,6 +152,7 @@ const {
             </span>
 
             <input
+              v-model="searchQuery"
               placeholder="Search"
               class="block w-full py-2 pl-8 pr-6 text-sm text-gray-700 placeholder-gray-400 bg-white border border-b border-gray-400 rounded-l rounded-r appearance-none sm:rounded-l-none focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"
             >
@@ -105,12 +182,12 @@ const {
                   <th
                     class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
                   >
-                    Role
+                    Company
                   </th>
                   <th
                     class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
                   >
-                    Created at
+                    Role
                   </th>
                   <th
                     class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
@@ -120,7 +197,7 @@ const {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(u, index) in paginatedTableData" :key="index">
+                <tr v-for="(u, index) in displayedContacts" :key="index">
                   <td
                     class="px-5 py-5 text-sm bg-white border-b border-gray-200"
                   >
@@ -128,7 +205,6 @@ const {
                       <div class="flex-shrink-0 w-10 h-10">
                         <img
                           class="w-full h-full rounded-full"
-                          :src="u.picture"
                           alt="profile pic"
                         >
                       </div>
@@ -144,28 +220,64 @@ const {
                     class="px-5 py-5 text-sm bg-white border-b border-gray-200"
                   >
                     <p class="text-gray-900 whitespace-nowrap">
-                      {{ u.role }}
+                      {{ u.company }}
                     </p>
                   </td>
                   <td
                     class="px-5 py-5 text-sm bg-white border-b border-gray-200"
                   >
                     <p class="text-gray-900 whitespace-nowrap">
-                      {{ u.created }}
+                      {{ u.title.length > 30 ? `${u.title.substring(0, 30)}...` : u.title }}
                     </p>
                   </td>
-                  <td
-                    class="px-5 py-5 text-sm bg-white border-b border-gray-200"
-                  >
-                    <span
-                      :class="`relative inline-block px-3 py-1 font-semibold text-${u.statusColor}-900 leading-tight`"
-                    >
-                      <span
-                        aria-hidden
-                        :class="`absolute inset-0 bg-${u.statusColor}-200 opacity-50 rounded-full`"
-                      />
-                      <span class="relative">{{ u.status }}</span>
-                    </span>
+                  <td class="px-5 py-5 text-sm bg-white border-b border-gray-200 relative">
+                    <div class="flex items-center justify-between">
+                      <span :class="`relative inline-block px-3 py-1 font-semibold text-${u.title}-900 leading-tight`">
+                        <a :href="`tel:${u.phone}`">
+                          {{ u.phone }}
+                        </a>
+
+                      </span>
+                      <div class="flex items-center space-x-2">
+                        <div class="relative flex flex-col items-center group">
+                          <button
+                            class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring"
+                            @click="activateUser(u.id)"
+                          >
+                            Kaspr
+                          </button>
+                          <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
+                            <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Activer</span>
+                            <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
+                          </div>
+                        </div>
+
+                        <div class="relative flex flex-col items-center group">
+                          <button
+                            class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring ml-2"
+                            @click="deactivateUser(u.id)"
+                          >
+                            DropContact
+                          </button>
+                          <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
+                            <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Désactiver</span>
+                            <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
+                          </div>
+                        </div>
+
+                        <div class="relative flex flex-col items-center group">
+                          <button
+                            class="px-3 py-1 text-xs text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none focus:ring ml-2"
+                          >
+                            Hubspot
+                          </button>
+                          <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
+                            <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Quelque chose</span>
+                            <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -173,17 +285,12 @@ const {
             <div
               class="flex flex-col items-center px-5 py-5 bg-white border-t xs:flex-row xs:justify-between"
             >
-              <span class="text-xs text-gray-900 xs:text-sm">Showing 1 to 4 of 50 Entries</span>
-
+              <span class="text-xs text-gray-900 xs:text-sm">Page {{ currentPage }} of {{ Math.ceil(totalEntries / pageSize) }}</span>
               <div class="inline-flex mt-2 xs:mt-0">
-                <button
-                  class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-300 rounded-l hover:bg-gray-400"
-                >
+                <button :disabled="currentPage === 1" class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-300 rounded-l hover:bg-gray-400" @click="prevPage">
                   Prev
                 </button>
-                <button
-                  class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-300 rounded-r hover:bg-gray-400"
-                >
+                <button :disabled="currentPage * pageSize >= totalEntries" class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-300 rounded-r hover:bg-gray-400" @click="nextPage">
                   Next
                 </button>
               </div>
@@ -192,5 +299,12 @@ const {
         </div>
       </div>
     </div>
+  </div>
+
+  <div v-if="loading" class="flex flex-col items-center justify-center min-h-screen">
+    <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900" />
+    <p class="mt-3 text-lg text-gray-600">
+      Chargement...
+    </p> <!-- Texte de chargement -->
   </div>
 </template>

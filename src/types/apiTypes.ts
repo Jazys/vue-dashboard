@@ -1,5 +1,30 @@
 export interface User {
   id: number
   name: string
-  // autres propriétés
+}
+
+export interface Contact {
+  id: number
+  name: string
+  title: string
+  company: string
+  phone: string
+  comment: string
+  linkedin_profile: string
+  linkedin_url: string
+  firstname: string
+  lastanme: string
+  vmid: string
+  vmid_2: string
+  created_date: Date
+  hs_id: number
+  deleted: boolean
+  area: string
+  status: string
+  PK: string
+  Employees: string
+  linkedin_company_url: string
+  user: string
+  industry: string
+  company_location: string
 }
