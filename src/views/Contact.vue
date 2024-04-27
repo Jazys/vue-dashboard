@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios'
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import ApiService from '../api/ApiService'
 import endpoints from '../api/endpoints'
 import type { Contact } from '../types/apiTypes'
@@ -152,29 +152,52 @@ async function syncUser(id: number) {
   }
 }
 
-function getCurrentContactName() {
-  return currentContact.value?.name || ''
-}
+const currentContactName = computed({
+  get: () => currentContact.value?.name || '',
+  set: (value) => {
+    if (currentContact.value)
+      currentContact.value.name = value
+  },
+})
 
-function getCurrentContactTitle() {
-  return currentContact.value?.title || ''
-}
+const currentContactTitle = computed({
+  get: () => currentContact.value?.title || '',
+  set: (value) => {
+    if (currentContact.value)
+      currentContact.value.title = value
+  },
+})
+const currentContactCompany = computed({
+  get: () => currentContact.value?.company || '',
+  set: (value) => {
+    if (currentContact.value)
+      currentContact.value.company = value
+  },
+})
 
-function getCurrentContactCompany() {
-  return currentContact.value?.company || ''
-}
+const currentContactIndustry = computed({
+  get: () => currentContact.value?.industry || '',
+  set: (value) => {
+    if (currentContact.value)
+      currentContact.value.industry = value
+  },
+})
 
-function getCurrentContactIndustry() {
-  return currentContact.value?.industry || ''
-}
+const currentContactEmail = computed({
+  get: () => currentContact.value?.email || '',
+  set: (value) => {
+    if (currentContact.value)
+      currentContact.value.email = value
+  },
+})
 
-function getCurrentContactEmail() {
-  return currentContact.value?.email || ''
-}
-
-function getCurrentContactPhone() {
-  return currentContact.value?.phone || ''
-}
+const currentContactPhone = computed({
+  get: () => currentContact.value?.phone || '',
+  set: (value) => {
+    if (currentContact.value)
+      currentContact.value.phone = value
+  },
+})
 </script>
 
 <template>
@@ -473,7 +496,7 @@ function getCurrentContactPhone() {
         <div>
           <label class="text-gray-700" for="username">Name</label>
           <input
-            v-model="getCurrentContactName"
+            v-model="currentContactName"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -483,7 +506,7 @@ function getCurrentContactPhone() {
         <div>
           <label class="text-gray-700" for="username">Title</label>
           <input
-            v-model="getCurrentContactTitle"
+            v-model="currentContactTitle"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -493,7 +516,7 @@ function getCurrentContactPhone() {
         <div>
           <label class="text-gray-700" for="username">Company</label>
           <input
-            v-model="getCurrentContactCompany"
+            v-model="currentContactCompany"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -503,7 +526,7 @@ function getCurrentContactPhone() {
         <div>
           <label class="text-gray-700" for="username">Industry</label>
           <input
-            v-model="getCurrentContactIndustry"
+            v-model="currentContactIndustry"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -513,7 +536,7 @@ function getCurrentContactPhone() {
         <div>
           <label class="text-gray-700" for="username">Email</label>
           <input
-            v-model="getCurrentContactEmail"
+            v-model="currentContactEmail"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -523,7 +546,7 @@ function getCurrentContactPhone() {
         <div>
           <label class="text-gray-700" for="username">Phone</label>
           <input
-            v-model="getCurrentContactPhone"
+            v-model="currentContactPhone"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
