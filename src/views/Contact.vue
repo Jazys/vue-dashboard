@@ -39,8 +39,10 @@ watch([pageSize, searchQuery, currentPage], () => {
   updateDisplayedContacts()
 })
 
-function toggleModal(index: number) {
-  currentContact.value = displayedContacts.value[index]
+function toggleModal(event: MouseEvent, index: number) {
+  event.preventDefault()
+  if (index !== -1)
+    currentContact.value = displayedContacts.value[index]
   showModal.value = !showModal.value
 }
 
@@ -148,6 +150,30 @@ async function syncUser(id: number) {
       displayError.value = false
     }, 2000)
   }
+}
+
+function getCurrentContactName() {
+  return currentContact.value?.name || ''
+}
+
+function getCurrentContactTitle() {
+  return currentContact.value?.title || ''
+}
+
+function getCurrentContactCompany() {
+  return currentContact.value?.company || ''
+}
+
+function getCurrentContactIndustry() {
+  return currentContact.value?.industry || ''
+}
+
+function getCurrentContactEmail() {
+  return currentContact.value?.email || ''
+}
+
+function getCurrentContactPhone() {
+  return currentContact.value?.phone || ''
 }
 </script>
 
@@ -392,7 +418,7 @@ async function syncUser(id: number) {
                           <div class="relative flex flex-col items-center group">
                             <button
                               class="px-3 py-1 text-xs text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none focus:ring ml-2"
-                              @click="toggleModal(index)"
+                              @click="toggleModal($event, index)"
                             >
                               Edit
                             </button>
@@ -437,7 +463,7 @@ async function syncUser(id: number) {
           <p class="text-2xl font-bold">
             Edit User
           </p>
-          <button class="p-2 bg-blue-500 rounded-full inline-flex items-center justify-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="toggleModal">
+          <button class="p-2 bg-blue-500 rounded-full inline-flex items-center justify-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="toggleModal($event, -1)">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" class="fill-current">
               <path d="M12.707 11.293l-1.414 1.414L9 10.414l-2.293 2.293-1.414-1.414L7.586 9 5.293 6.707l1.414-1.414L9 7.586l2.293-2.293 1.414 1.414L10.414 9l2.293 2.293z" />
             </svg>
@@ -447,7 +473,7 @@ async function syncUser(id: number) {
         <div>
           <label class="text-gray-700" for="username">Name</label>
           <input
-            v-model="currentContact.name"
+            v-model="getCurrentContactName"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -457,7 +483,7 @@ async function syncUser(id: number) {
         <div>
           <label class="text-gray-700" for="username">Title</label>
           <input
-            v-model="currentContact.title"
+            v-model="getCurrentContactTitle"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -467,7 +493,7 @@ async function syncUser(id: number) {
         <div>
           <label class="text-gray-700" for="username">Company</label>
           <input
-            v-model="currentContact.company"
+            v-model="getCurrentContactCompany"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -477,7 +503,7 @@ async function syncUser(id: number) {
         <div>
           <label class="text-gray-700" for="username">Industry</label>
           <input
-            v-model="currentContact.industry"
+            v-model="getCurrentContactIndustry"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -487,7 +513,7 @@ async function syncUser(id: number) {
         <div>
           <label class="text-gray-700" for="username">Email</label>
           <input
-            v-model="currentContact.email"
+            v-model="getCurrentContactEmail"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
@@ -497,7 +523,7 @@ async function syncUser(id: number) {
         <div>
           <label class="text-gray-700" for="username">Phone</label>
           <input
-            v-model="currentContact.phone"
+            v-model="getCurrentContactPhone"
             readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
