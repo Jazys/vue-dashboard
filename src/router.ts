@@ -2,13 +2,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import Dashboard from './views/Dashboard.vue'
-import Forms from './views/Forms.vue'
-import Tables from './views/Tables.vue'
-import UIElements from './views/UIElements.vue'
 import LoginOAuth from './views/LoginOAuth.vue'
-import Modal from './views/Modal.vue'
-import Card from './views/Card.vue'
-import Blank from './views/Blank.vue'
 import OAuthRedirect from './views/OAuthRedirect.vue'
 import Profile from './views/Profile.vue'
 import Contact from './views/Contact.vue'
@@ -31,7 +25,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Dashboard',
     component: Dashboard,
   },
-  {
+  /* {
     path: '/forms',
     name: 'Forms',
     component: Forms,
@@ -60,7 +54,7 @@ const routes: RouteRecordRaw[] = [
     path: '/blank',
     name: 'Blank',
     component: Blank,
-  },
+  }, */
   {
     path: '/profile',
     name: 'Profile',
