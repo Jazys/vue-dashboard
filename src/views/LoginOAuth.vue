@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { useAuth0 } from '@auth0/auth0-vue'
+import { onMounted } from 'vue'
 import kobbleClient from '../lib/kobbleClient'
+import router from '../router'
+
+onMounted(async () => {
+  const User = await kobbleClient.getUser()
+  if (User != null && User.id)
+    router.push('/contact')
+})
 
 async function login() {
   if (import.meta.env.VITE_ENABLE_AUTH_KOBBLE === 'true')
@@ -36,7 +44,7 @@ async function login() {
             fill="white"
           />
         </svg>
-        <span class="text-2xl font-semibold text-gray-700">V-Dashboard</span>
+        <span class="text-2xl font-semibold text-gray-700">BuyingSignal</span>
       </div>
 
       <form class="mt-4" @submit.prevent="login">

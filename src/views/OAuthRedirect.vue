@@ -6,13 +6,17 @@ export default {
   name: 'OAuthRedirect',
   async created() {
     let token
+    let user_id
 
-    if (import.meta.env.VITE_ENABLE_AUTH_KOBBLE === 'true') {
+    try {
       await kobbleClient.handleRedirectCallback()
-      await kobbleClient.getUser()
+      user_id = await kobbleClient.getUser()
       token = await kobbleClient.getAccessToken()
-      console.log(token)
-      console.log(await kobbleClient.getIdToken())
+    }
+    catch (error) {
+    // Gérer l'erreur ici
+      console.error('Une erreur s\'est produite lors de l\'authentification avec Kobble:', error)
+    // Peut-être afficher un message d'erreur à l'utilisateur ou rediriger vers une page d'erreur
     }
 
     if (import.meta.env.VITE_ENABLE_AUTH0 === 'true') {
@@ -20,12 +24,15 @@ export default {
       token = await getAccessTokenSilently()
     }
 
-    if (token) {
+    if (token && user_id) {
       localStorage.setItem('bearer-token', token)
+      localStorage.setItem('user-id', user_id.id)
+      if (user_id.email)
+        localStorage.setItem('user-email', user_id.email)
       this.$router.push('/dashboard')
     }
     else {
-      this.$router.push('/login')
+      this.$router.push('/')
     }
   },
 }

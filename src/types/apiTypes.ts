@@ -27,4 +27,5 @@ export interface Contact {
   user: string
   industry: string
   company_location: string
+  email: string
 }

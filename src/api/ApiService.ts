@@ -39,6 +39,10 @@ class ApiService {
   post<T>(resource: string, data: any): Promise<T> {
     return this.axios.post<T>(resource, data).then((response: { data: any }) => response.data)
   }
+
+  patch<T>(resource: string, data: any): Promise<T> {
+    return this.axios.patch<T>(resource, data).then((response: { data: any }) => response.data)
+  }
 }
 
 export default new ApiService()
