@@ -1,4 +1,4 @@
-import { createKobbleClient } from '@kobbleio/auth-spa-js'
+import { createKobbleClient } from '@kobbleio/javascript'
 
 const kobbleClient = createKobbleClient({
   domain: import.meta.env.VITE_DOMAIN,

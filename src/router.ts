@@ -6,6 +6,10 @@ import LoginOAuth from './views/LoginOAuth.vue'
 import OAuthRedirect from './views/OAuthRedirect.vue'
 import Profile from './views/Profile.vue'
 import Contact from './views/Contact.vue'
+import kobbleClient from './lib/kobbleClient'
+import { useRequestStore } from './store/request'
+
+let store
 
 const routes: RouteRecordRaw[] = [
   {
@@ -75,14 +79,22 @@ const router = createRouter({
 // Guard global avant chaque route
 router.beforeEach(async (to, from, next) => {
   if (to.path !== '/oauth-redirect') {
+    const store = useRequestStore()
     const token = localStorage.getItem('bearer-token')
-    console.log(token)
 
     if (token) {
-      next()
+      if (await kobbleClient.isAuthenticated) {
+        store.startLoading()
+        store.stopLoading()
+        next()
+      }
+      else {
+        localStorage.setItem('bearer-token', '')
+        next({ name: 'Login' })
+      }
     }
     else {
-    // Si pas de token, redirigez vers la page de connexion ou une autre action
+      // Si pas de token, redirigez vers la page de connexion ou une autre action
       if (to.name !== 'Login') { // Évitez la redirection si vous êtes déjà sur la page de login
         next({ name: 'Login' })
       }

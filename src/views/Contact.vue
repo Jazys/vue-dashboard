@@ -80,7 +80,8 @@ function prevPage() {
 async function updateUser() {
   try {
     isLoadingSave.value = true
-    await axios.post('/api/user/activate', { currentContact })
+    const response = await ApiService.patch<Contact>(endpoints.patchContact, { contact: currentContact.value })
+    console.log(response)
     messageSaveDisplay.value = 'Succes !'
   }
   catch (error) {
@@ -116,7 +117,8 @@ async function deleteUser() {
 async function enrichUser(id: number) {
   try {
     isLoadingEnrich.value = true
-    const response = await axios.post('/api/user/activate', { id })
+    const response = await ApiService.post<Contact>(endpoints.enrich, { idContact: displayedContacts.value[id].id, idUser: userId.value, enrich: ['contact.phones', 'contact.emails'] })
+    console.log(response)
     displaySuccess.value = true
     // Mettre à jour les données de l'utilisateur ou rafraîchir les données ici
   }
@@ -136,7 +138,8 @@ async function enrichUser(id: number) {
 async function syncUser(id: number) {
   try {
     isLoadingSync.value = true
-    const response = await axios.post('/api/user/activate', { id })
+    const response = await ApiService.post<Contact>(endpoints.syncContact, { idContact: displayedContacts.value[id].id, idUser: userId.value })
+
     displaySuccess.value = true
   }
   catch (error) {
@@ -399,7 +402,7 @@ const currentContactPhone = computed({
                       <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                           <div class="relative flex flex-col items-center group">
-                            <button class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingEnrich" @click="enrichUser(u.id)">
+                            <button class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingEnrich" @click="enrichUser(index)">
                               <div v-if="isLoadingEnrich" class="flex items-center">
                                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -419,7 +422,7 @@ const currentContactPhone = computed({
                           </div>
 
                           <div class="relative flex flex-col items-center group">
-                            <button class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingSync" @click="syncUser(u.id)">
+                            <button class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingSync" @click="syncUser(index)">
                               <div v-if="isLoadingSync" class="flex items-center">
                                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -497,7 +500,6 @@ const currentContactPhone = computed({
           <label class="text-gray-700" for="username">Name</label>
           <input
             v-model="currentContactName"
-            readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
           >
@@ -507,7 +509,6 @@ const currentContactPhone = computed({
           <label class="text-gray-700" for="username">Title</label>
           <input
             v-model="currentContactTitle"
-            readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
           >
@@ -517,7 +518,6 @@ const currentContactPhone = computed({
           <label class="text-gray-700" for="username">Company</label>
           <input
             v-model="currentContactCompany"
-            readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
           >
@@ -527,7 +527,6 @@ const currentContactPhone = computed({
           <label class="text-gray-700" for="username">Industry</label>
           <input
             v-model="currentContactIndustry"
-            readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
           >
@@ -537,7 +536,6 @@ const currentContactPhone = computed({
           <label class="text-gray-700" for="username">Email</label>
           <input
             v-model="currentContactEmail"
-            readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
           >
@@ -547,7 +545,6 @@ const currentContactPhone = computed({
           <label class="text-gray-700" for="username">Phone</label>
           <input
             v-model="currentContactPhone"
-            readonly
             class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
             type="text"
           >

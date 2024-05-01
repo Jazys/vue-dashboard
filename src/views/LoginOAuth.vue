@@ -5,6 +5,7 @@ import kobbleClient from '../lib/kobbleClient'
 import router from '../router'
 
 onMounted(async () => {
+  console.log('eeeeee')
   const User = await kobbleClient.getUser()
   if (User != null && User.id)
     router.push('/contact')

@@ -1,13 +1,18 @@
 import { createApp } from 'vue'
 import { createAuth0 } from '@auth0/auth0-vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './assets/main.css'
-
 import DashboardLayout from './components/DashboardLayout.vue'
 import EmptyLayout from './components/EmptyLayout.vue'
+import ApiService from './api/ApiService'
+
+const pinia = createPinia()
 
 const app = createApp(App)
+app.use(pinia)
+ApiService.init()
 
 if (import.meta.env.VITE_ENABLE_AUTH0 === 'true') {
   app.use(createAuth0({

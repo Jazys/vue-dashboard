@@ -3,10 +3,10 @@ import { ref } from 'vue'
 import { useAuth0 } from '@auth0/auth0-vue'
 import { useSidebar } from '../composables/useSidebar'
 import kobbleClient from '../lib/kobbleClient'
+import Credits from './Credits.vue'
 
 async function logout() {
   localStorage.removeItem('bearer-token')
-  console.log('logou')
   if (import.meta.env.VITE_ENABLE_AUTH_KOBBLE === 'true')
     await kobbleClient.logout()
 
@@ -47,6 +47,8 @@ const { isOpen } = useSidebar()
     </div>
 
     <div class="flex items-center">
+      <Credits credits="credits" />
+
       <button class="flex mx-4 text-gray-600 focus:outline-none">
         <svg
           class="w-6 h-6"

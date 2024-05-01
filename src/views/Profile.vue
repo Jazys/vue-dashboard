@@ -1,85 +1,86 @@
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
+<script setup lang="ts">
+import type { User } from '@auth0/auth0-vue'
+import { onMounted, ref } from 'vue'
 import ApiService from '../api/ApiService'
 import endpoints from '../api/endpoints'
 
-export default defineComponent({
-  setup() {
-    const inputValues = ref([
-      { label: 'Enrich', value: '' },
-      { label: 'Phantombuster', value: '' },
-      { label: 'Hubspot', value: '' },
-    ])
+const inputValues = ref([
+  { label: 'Enrich', value: '' },
+  { label: 'Phantombuster', value: '' },
+  { label: 'Hubspot', value: '' },
+])
 
-    const displaySuccess = ref(false)
-    const displayError = ref(false)
-    const showCopyToast = ref(false)
-    const toastCoordinates = ref({ x: 0, y: 0 })
-    const isLoading = ref(false)
+const displaySuccess = ref(false)
+const displayError = ref(false)
+const showCopyToast = ref(false)
+const toastCoordinates = ref({ x: 0, y: 0 })
+const isLoading = ref(false)
 
-    const userId = ref(localStorage.getItem('user-id') || '')
-    const userMail = ref(localStorage.getItem('user-email') || '')
+const userId = ref(localStorage.getItem('user-id') || '')
+const userMail = ref(localStorage.getItem('user-email') || '')
 
-    const copyToClipboard = async (url: string, event: any) => {
-      try {
-        event.preventDefault()
-        await navigator.clipboard.writeText(url)
-        const rect = event.target.getBoundingClientRect()
-        toastCoordinates.value = {
-          x: rect.right + 10,
-          y: rect.top - 5,
-        }
-        showCopyToast.value = true
-      }
-      catch (err) {
-        showCopyToast.value = true
-        console.error('Erreur lors de la copie:', err)
-      }
-      finally {
-        setTimeout(() => {
-          showCopyToast.value = false
-        }, 2000)
-      }
-    }
-
-    const manageAccount = async () => {
-      let url = ''
-
-      if (import.meta.env.VITE_ENABLE_AUTH_KOBBLE === 'true')
-        url = import.meta.env.VITE_DOMAIN
-
-      window.open(url, '_blank')
-    }
-
-    const saveData = async () => {
-      isLoading.value = true
-      const requestBody = {
-        id: userId.value,
-        enrich: inputValues.value[0].value,
-        phantombuster: inputValues.value[1].value,
-        hubspot: inputValues.value[2].value,
-      }
-      try {
-        const response = await ApiService.patch(endpoints.modifyUser, requestBody)
-        displaySuccess.value = true
-        if (response != null)
-          displaySuccess.value = true
-      }
-      catch (err) {
-        displayError.value = true
-      }
-      finally {
-        isLoading.value = false
-        setTimeout(() => {
-          displayError.value = false
-          displaySuccess.value = false
-        }, 2000)
-      }
-    }
-
-    return { inputValues, copyToClipboard, saveData, manageAccount, userId, userMail, showCopyToast, toastCoordinates, displaySuccess, displayError, isLoading }
-  },
+onMounted(async () => {
+  console.log('totot')
+  const response = await ApiService.get<User>(endpoints.getUser, { user: userId.value })
+  console.log(response)
 })
+
+async function copyToClipboard(url: string, event: any) {
+  try {
+    event.preventDefault()
+    await navigator.clipboard.writeText(url)
+    const rect = event.target.getBoundingClientRect()
+    toastCoordinates.value = {
+      x: rect.right + 10,
+      y: rect.top - 5,
+    }
+    showCopyToast.value = true
+  }
+  catch (err) {
+    showCopyToast.value = true
+    console.error('Erreur lors de la copie:', err)
+  }
+  finally {
+    setTimeout(() => {
+      showCopyToast.value = false
+    }, 2000)
+  }
+}
+
+async function manageAccount() {
+  let url = ''
+
+  if (import.meta.env.VITE_ENABLE_AUTH_KOBBLE === 'true')
+    url = import.meta.env.VITE_DOMAIN
+
+  window.open(url, '_blank')
+}
+
+async function saveData() {
+  isLoading.value = true
+  const requestBody = {
+    id: userId.value,
+    enrich: inputValues.value[0].value,
+    phantombuster: inputValues.value[1].value,
+    hubspot: inputValues.value[2].value,
+  }
+  try {
+    const response = await ApiService.patch(endpoints.modifyUser, requestBody)
+    displaySuccess.value = true
+    if (response != null)
+      displaySuccess.value = true
+  }
+  catch (err) {
+    displayError.value = true
+  }
+  finally {
+    isLoading.value = false
+    setTimeout(() => {
+      displayError.value = false
+      displaySuccess.value = false
+    }, 2000)
+  }
+}
 </script>
 
 <template>
