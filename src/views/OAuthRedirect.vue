@@ -14,9 +14,7 @@ export default {
       token = await kobbleClient.getAccessToken()
     }
     catch (error) {
-    // Gérer l'erreur ici
       console.error('Une erreur s\'est produite lors de l\'authentification avec Kobble:', error)
-    // Peut-être afficher un message d'erreur à l'utilisateur ou rediriger vers une page d'erreur
     }
 
     if (import.meta.env.VITE_ENABLE_AUTH0 === 'true') {

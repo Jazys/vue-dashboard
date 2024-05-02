@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRequestStore } from '../store/request'
 import kobbleClient from '../lib/kobbleClient'
 
@@ -15,6 +15,18 @@ watch(() => requestStore.loading, async (loading) => {
       credits.value = quotaLeft[0].usage
       creditsLimit.value = quotaLeft[0].limit
     }
+  }
+})
+
+onMounted(async () => {
+  const isAuth = await kobbleClient.isAuthenticated()
+  if (isAuth) {
+    const quotaLeft = await kobbleClient.acl.listQuotas()
+    credits.value = quotaLeft[0].usage
+    creditsLimit.value = quotaLeft[0].limit
+  }
+  else {
+    await kobbleClient.logout()
   }
 })
 </script>

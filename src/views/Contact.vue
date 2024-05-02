@@ -24,6 +24,10 @@ const messageDeleteDisplay = ref ('Delete')
 const displaySuccess = ref(false)
 const displayError = ref(false)
 
+const needCheckStatus = ref(false)
+
+const enrichissementPending = ref(false)
+
 onMounted(async () => {
   loading.value = true
   try {
@@ -39,6 +43,11 @@ watch([pageSize, searchQuery, currentPage], () => {
   updateDisplayedContacts()
 })
 
+watch(enrichissementPending, (newValue, oldValue) => {
+  if (newValue === true)
+    checkAllContactsStatus()
+})
+
 function toggleModal(event: MouseEvent, index: number) {
   event.preventDefault()
   if (index !== -1)
@@ -51,6 +60,12 @@ async function getListAll() {
   allContacts.value = response
   totalEntries.value = response.length
   updateDisplayedContacts()
+
+  // search if an enrichissement is pending
+  for (let i = 0; i < allContacts.value.length; i++) {
+    if (allContacts.value[i].action !== undefined && allContacts.value[i].action !== 'done')
+      enrichissementPending.value = true
+  }
 }
 
 function updateDisplayedContacts() {
@@ -118,9 +133,13 @@ async function enrichUser(id: number) {
   try {
     isLoadingEnrich.value = true
     const response = await ApiService.post<Contact>(endpoints.enrich, { idContact: displayedContacts.value[id].id, idUser: userId.value, enrich: ['contact.phones', 'contact.emails'] })
-    console.log(response)
     displaySuccess.value = true
-    // Mettre à jour les données de l'utilisateur ou rafraîchir les données ici
+
+    // need to wait enrichissement and check value with interval
+    displayedContacts.value[id].action = 'pending'
+    needCheckStatus.value = true
+    enrichissementPending.value = true
+    // checkAllContactsStatus()
   }
   catch (error) {
     console.error('Erreur lors de lactivation', error)
@@ -132,6 +151,49 @@ async function enrichUser(id: number) {
       displaySuccess.value = false
       displayError.value = false
     }, 2000)
+  }
+}
+
+async function checkAllContactsStatus() {
+  try {
+    needCheckStatus.value = true
+    let allDone = false
+
+    while (!allDone) {
+      allDone = true
+      // get all contact
+      const allTmpContact = await ApiService.get<Contact[]>(endpoints.contacts, { user: userId.value })
+      // For displaying contact, look if an action is pending
+      for (let i = 0; i < displayedContacts.value.length; i++) {
+        if (displayedContacts.value[i].action !== 'done') {
+          // action is pending for displaying user, so after request, need to check if state change
+          // get index
+          const indexContact = allTmpContact.findIndex(contact => contact.id === displayedContacts.value[i].id)
+
+          if (allTmpContact[indexContact].action !== undefined && allTmpContact[indexContact].action !== 'done') {
+            allDone = false
+          }
+          else if (allTmpContact[indexContact].action === undefined || allTmpContact[indexContact].action === 'done') {
+            // if it's done we can update state of action
+            displayedContacts.value[i].phone = allTmpContact[indexContact].phone
+            displayedContacts.value[i].email = allTmpContact[indexContact].email
+            displayedContacts.value[i].action = 'done'
+          }
+        }
+      }
+
+      if (!allDone)
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Attendre 1 seconde avant de refaire les vérifications
+    }
+
+    displaySuccess.value = true // Indiquer le succès si tous les contacts sont 'done'
+  }
+  catch (error) {
+    console.error('Erreur lors de la vérification des contacts', error)
+  }
+  finally {
+    needCheckStatus.value = false
+    enrichissementPending.value = false
   }
 }
 
@@ -313,6 +375,14 @@ const currentContactPhone = computed({
                 Import List
               </button>
             </div>
+          </div>
+
+          <div v-if="enrichissementPending" class="flex justify-center items-center p-4 mb-4 bg-blue-100 border border-blue-400 text-blue-700">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+            Enrichissement en cours...
           </div>
 
           <div class="px-4 py-4 -mx-4 overflow-x-auto sm:-mx-8 sm:px-8">
@@ -587,3 +657,7 @@ const currentContactPhone = computed({
     </p> <!-- Texte de chargement -->
   </div>
 </template>
+
+function contact(value: Contact, index: number, obj: Contact[]): unknown {
+  throw new Error('Function not implemented.')
+}

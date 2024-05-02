@@ -1,6 +1,9 @@
 export interface User {
   id: number
   name: string
+  enrich: string
+  hubspot: string
+  phantombuster: string
 }
 
 export interface Contact {
@@ -28,4 +31,5 @@ export interface Contact {
   industry: string
   company_location: string
   email: string
+  action: string
 }

@@ -1,25 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import ApiService from '../api/ApiService'
+import endpoints from '../api/endpoints'
+import type { Contact } from '../types/apiTypes'
 
-interface User {
-  name: string
-  email: string
-  title: string
-  title2: string
-  status: string
-  role: string
-}
+const userId = ref(localStorage.getItem('user-id') || '')
+const nbContacts = ref(0)
 
-const testUser: User = {
-  name: 'John Doe',
-  email: 'john@example.com',
-  title: 'Software Engineer',
-  title2: 'Web dev',
-  status: 'Active',
-  role: 'Owner',
-}
+onMounted(async () => {
+  try {
+    const response = await ApiService.get<Contact[]>(endpoints.contacts, { user: userId.value })
 
-const users = ref<User[]>([...Array(10).keys()].map(() => testUser))
+    if (response != null)
+      nbContacts.value = response.length
+  }
+  catch (error) {
+    console.error('Failed to fetch contacts:', error)
+  }
+})
 </script>
 
 <template>
@@ -70,10 +68,10 @@ const users = ref<User[]>([...Array(10).keys()].map(() => testUser))
 
             <div class="mx-5">
               <h4 class="text-2xl font-semibold text-gray-700">
-                8,282
+                {{ nbContacts }}
               </h4>
               <div class="text-gray-500">
-                New Users
+                Contacts
               </div>
             </div>
           </div>
@@ -107,7 +105,7 @@ const users = ref<User[]>([...Array(10).keys()].map(() => testUser))
 
             <div class="mx-5">
               <h4 class="text-2xl font-semibold text-gray-700">
-                100
+                100 Crédits
               </h4>
               <div class="text-gray-500">
                 Total Quota

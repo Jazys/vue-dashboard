@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { User } from '@auth0/auth0-vue'
 import { onMounted, ref } from 'vue'
 import ApiService from '../api/ApiService'
 import endpoints from '../api/endpoints'
+import type { User } from '../types/apiTypes'
 
 const inputValues = ref([
   { label: 'Enrich', value: '' },
@@ -20,9 +20,12 @@ const userId = ref(localStorage.getItem('user-id') || '')
 const userMail = ref(localStorage.getItem('user-email') || '')
 
 onMounted(async () => {
-  console.log('totot')
-  const response = await ApiService.get<User>(endpoints.getUser, { user: userId.value })
-  console.log(response)
+  const response = await ApiService.get<User[]>(endpoints.getUser, { user: userId.value })
+  if (response != null && response.length === 1) {
+    inputValues.value[0].value = response[0].enrich
+    inputValues.value[1].value = response[0].phantombuster
+    inputValues.value[2].value = response[0].hubspot
+  }
 })
 
 async function copyToClipboard(url: string, event: any) {
@@ -49,7 +52,6 @@ async function copyToClipboard(url: string, event: any) {
 
 async function manageAccount() {
   let url = ''
-
   if (import.meta.env.VITE_ENABLE_AUTH_KOBBLE === 'true')
     url = import.meta.env.VITE_DOMAIN
 

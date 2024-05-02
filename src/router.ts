@@ -85,8 +85,8 @@ router.beforeEach(async (to, from, next) => {
     if (token) {
       if (await kobbleClient.isAuthenticated) {
         store.startLoading()
-        store.stopLoading()
         next()
+        store.stopLoading()
       }
       else {
         localStorage.setItem('bearer-token', '')
