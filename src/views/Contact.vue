@@ -4,9 +4,11 @@ import { computed, onMounted, ref, watch } from 'vue'
 import ApiService from '../api/ApiService'
 import endpoints from '../api/endpoints'
 import type { Contact } from '../types/apiTypes'
+import UploadContact from './UploadListContact.vue'
 
 const allContacts = ref<Contact[]>([])
 const displayedContacts = ref<Contact[]>([])
+const displayedContactsOptionEnrich = ref<string[]>([])
 const loading = ref(true)
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -27,6 +29,14 @@ const displayError = ref(false)
 const needCheckStatus = ref(false)
 
 const enrichissementPending = ref(false)
+
+const importedData = ref([])
+const showUploadModal = ref(false)
+
+async function handleDataImported(data: any) {
+  console.log(data)
+  const response = await ApiService.post<Contact>(endpoints.createContact, { idUser: userId.value, firstname: data[0].title })
+}
 
 onMounted(async () => {
   loading.value = true
@@ -76,6 +86,8 @@ function updateDisplayedContacts() {
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
   displayedContacts.value = filteredContacts.slice(start, end)
+  console.log(displayedContacts.value[0].phone)
+  displayedContactsOptionEnrich.value = Array(pageSize.value).fill('Both')
 }
 
 function nextPage() {
@@ -132,7 +144,21 @@ async function deleteUser() {
 async function enrichUser(id: number) {
   try {
     isLoadingEnrich.value = true
-    const response = await ApiService.post<Contact>(endpoints.enrich, { idContact: displayedContacts.value[id].id, idUser: userId.value, enrich: ['contact.phones', 'contact.emails'] })
+
+    const tabParameterForEnrich = []
+    if (displayedContactsOptionEnrich.value[id] === 'Both') {
+      tabParameterForEnrich.push('contact.phones')
+      tabParameterForEnrich.push('contact.emails')
+    }
+    else if (displayedContactsOptionEnrich.value[id] === 'Phone') {
+      tabParameterForEnrich.push('contact.phones')
+    }
+
+    else if (displayedContactsOptionEnrich.value[id] === 'Mail') {
+      tabParameterForEnrich.push('contact.emails')
+    }
+
+    const response = await ApiService.post<Contact>(endpoints.enrich, { idContact: displayedContacts.value[id].id, idUser: userId.value, enrich: tabParameterForEnrich })
     displaySuccess.value = true
 
     // need to wait enrichissement and check value with interval
@@ -183,7 +209,7 @@ async function checkAllContactsStatus() {
       }
 
       if (!allDone)
-        await new Promise(resolve => setTimeout(resolve, 1000)) // Attendre 1 seconde avant de refaire les vérifications
+        await new Promise(resolve => setTimeout(resolve, 30000)) // Attendre 1 seconde avant de refaire les vérifications
     }
 
     displaySuccess.value = true // Indiquer le succès si tous les contacts sont 'done'
@@ -371,285 +397,306 @@ const currentContactPhone = computed({
               </button>
               <button
                 class="px-4 py-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
+                @click="showUploadModal = true"
               >
                 Import List
               </button>
             </div>
           </div>
 
-          <div v-if="enrichissementPending" class="flex justify-center items-center p-4 mb-4 bg-blue-100 border border-blue-400 text-blue-700">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
-            Enrichissement en cours...
-          </div>
+          <div>
+            <div v-if="enrichissementPending" class="flex justify-center items-center p-4 mb-4 bg-blue-100 border border-blue-400 text-blue-700">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Enrichissement en cours...
+            </div>
 
-          <div class="px-4 py-4 -mx-4 overflow-x-auto sm:-mx-8 sm:px-8">
-            <div
-              class="inline-block min-w-full overflow-hidden rounded-lg shadow"
-            >
-              <table class="min-w-full leading-normal">
-                <thead>
-                  <tr>
-                    <th
-                      class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                    >
-                      User
-                    </th>
-                    <th
-                      class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                    >
-                      Company
-                    </th>
-                    <th
-                      class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                    >
-                      Email
-                    </th>
-                    <th
-                      class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                    >
-                      Phone
-                    </th>
-                    <th
-                      class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                    >
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(u, index) in displayedContacts" :key="index">
-                    <td
-                      class="px-5 py-5 text-sm bg-white border-b border-gray-200"
-                    >
-                      <div class="flex items-center">
-                        <div class="flex-shrink-0 w-10 h-10">
-                          <img
-                            class="w-full h-full rounded-full"
-                            alt="profile pic"
-                          >
-                        </div>
-
-                        <div class="ml-3">
-                          <p class="text-gray-900 whitespace-nowrap font-bold">
-                            {{ u.name }}
-                          </p>
-                          <p class="text-gray-900 whitespace-nowrap">
-                            {{ u.title }}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      class="px-5 py-5 text-sm bg-white border-b border-gray-200"
-                    >
-                      <p class="text-gray-900 whitespace-nowrap font-bold">
-                        {{ u.company }}
-                      </p>
-                      <p class="text-gray-900 whitespace-nowrap">
-                        {{ u.industry }}
-                      </p>
-                    </td>
-                    <td
-                      class="px-5 py-5 text-sm bg-white border-b border-gray-200"
-                    >
-                      <p class="text-gray-900 whitespace-nowrap">
-                        {{ u.email.length > 30 ? `${u.email.substring(0, 30)}...` : u.email }}
-                      </p>
-                    </td>
-                    <td class="px-5 py-5 text-sm bg-white border-b border-gray-200">
-                      <div class="flex items-center justify-between">
-                        <span :class="`relative inline-block px-3 py-1 font-semibold text-${u.title}-900 leading-tight`">
-                          <a :href="`tel:${u.phone}`">
-                            {{ u.phone }}
-                          </a>
-                        </span>
-                      </div>
-                    </td>
-                    <td class="px-5 py-5 text-sm bg-white border-b border-gray-200 relative">
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                          <div class="relative flex flex-col items-center group">
-                            <button class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingEnrich" @click="enrichUser(index)">
-                              <div v-if="isLoadingEnrich" class="flex items-center">
-                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                Loading...
-                              </div>
-                              <div v-else>
-                                Enrich
-                              </div>
-                            </button>
-
-                            <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
-                              <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Find mail/phone</span>
-                              <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
-                            </div>
-                          </div>
-
-                          <div class="relative flex flex-col items-center group">
-                            <button class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingSync" @click="syncUser(index)">
-                              <div v-if="isLoadingSync" class="flex items-center">
-                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                Loading...
-                              </div>
-                              <div v-else>
-                                Sync
-                              </div>
-                            </button>
-
-                            <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
-                              <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Update hubspot user</span>
-                              <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
-                            </div>
-                          </div>
-
-                          <div class="relative flex flex-col items-center group">
-                            <button
-                              class="px-3 py-1 text-xs text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none focus:ring ml-2"
-                              @click="toggleModal($event, index)"
-                            >
-                              Edit
-                            </button>
-                            <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
-                              <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Edit current user</span>
-                              <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div class="px-4 py-4 -mx-4 overflow-x-auto sm:-mx-8 sm:px-8">
               <div
-                class="flex flex-col items-center px-5 py-5 bg-white border-t xs:flex-row xs:justify-between"
+                class="inline-block min-w-full overflow-hidden rounded-lg shadow"
               >
-                <span class="text-xs text-gray-900 xs:text-sm">Page {{ currentPage }} of {{ Math.ceil(totalEntries / pageSize) }}</span>
-                <div class="inline-flex mt-2 xs:mt-0">
-                  <button :disabled="currentPage === 1" class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-300 rounded-l hover:bg-gray-400" @click="prevPage">
-                    Prev
-                  </button>
-                  <button :disabled="currentPage * pageSize >= totalEntries" class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-300 rounded-r hover:bg-gray-400" @click="nextPage">
-                    Next
-                  </button>
+                <table class="min-w-full leading-normal">
+                  <thead>
+                    <tr>
+                      <th
+                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                      >
+                        User
+                      </th>
+                      <th
+                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                      >
+                        Company
+                      </th>
+                      <th
+                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                      >
+                        Email
+                      </th>
+                      <th
+                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                      >
+                        Phone
+                      </th>
+                      <th
+                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                      >
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(u, index) in displayedContacts" :key="index">
+                      <td
+                        class="px-5 py-5 text-sm bg-white border-b border-gray-200"
+                      >
+                        <div class="flex items-center">
+                          <div class="flex-shrink-0 w-10 h-10">
+                            <img
+                              class="w-full h-full rounded-full"
+                              alt="profile pic"
+                              :src="u.photo || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80'"
+                            >
+                          </div>
+
+                          <div class="ml-3">
+                            <p class="text-gray-900 whitespace-nowrap font-bold">
+                              {{ u.name }}
+                            </p>
+                            <p class="text-gray-900 whitespace-nowrap">
+                              {{ u.title }}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="px-5 py-5 text-sm bg-white border-b border-gray-200"
+                      >
+                        <p class="text-gray-900 whitespace-nowrap font-bold">
+                          {{ u.company }}
+                        </p>
+                        <p class="text-gray-900 whitespace-nowrap">
+                          {{ u.industry }}
+                        </p>
+                      </td>
+                      <td
+                        class="px-5 py-5 text-sm bg-white border-b border-gray-200"
+                      >
+                        <div class="flex flex-col items-start space-y-1">
+                          <p
+                            v-for="(mail, indexMail) in u.email.split('\n')" :key="indexMail"
+                            class="text-gray-900 whitespace-nowrap"
+                          >
+                            {{ mail.length > 30 ? `${mail.substring(0, 30)}...` : mail }}
+                          </p>
+                        </div>
+                      </td>
+                      <td class="px-5 py-5 text-sm bg-white border-b border-gray-200">
+                        <div class="flex flex-col items-start space-y-1">
+                          <span
+                            v-for="(phone, indexPhone) in u.phone.split('\n')" :key="indexPhone"
+                            :class="`relative inline-block px-3 py-1 font-semibold text-${u.title}-900 leading-tight`"
+                          >
+                            <a :href="`tel:${phone.trim()}`">{{ phone.trim() }}</a>
+                          </span>
+                        </div>
+                      </td>
+                      <td class="px-5 py-5 text-sm bg-white border-b border-gray-200 relative">
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center space-x-2">
+                            <div class="relative">
+                              <select v-model="displayedContactsOptionEnrich[index]" class="px-3 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300">
+                                <option>Email</option>
+                                <option>Phone</option>
+                                <option>Both</option>
+                              </select>
+                            </div>
+
+                            <div class="relative flex flex-col items-center group">
+                              <button class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingEnrich" @click="enrichUser(index)">
+                                <div v-if="isLoadingEnrich" class="flex items-center">
+                                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                  </svg>
+                                  Loading...
+                                </div>
+                                <div v-else>
+                                  Enrich
+                                </div>
+                              </button>
+
+                              <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
+                                <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Find mail/phone</span>
+                                <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
+                              </div>
+                            </div>
+
+                            <div class="relative flex flex-col items-center group">
+                              <button class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingSync" @click="syncUser(index)">
+                                <div v-if="isLoadingSync" class="flex items-center">
+                                  <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                  </svg>
+                                  Loading...
+                                </div>
+                                <div v-else>
+                                  Sync
+                                </div>
+                              </button>
+
+                              <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
+                                <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Update hubspot user</span>
+                                <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
+                              </div>
+                            </div>
+
+                            <div class="relative flex flex-col items-center group">
+                              <button
+                                class="px-3 py-1 text-xs text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none focus:ring ml-2"
+                                @click="toggleModal($event, index)"
+                              >
+                                Edit
+                              </button>
+                              <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
+                                <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Edit current user</span>
+                                <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div
+                  class="flex flex-col items-center px-5 py-5 bg-white border-t xs:flex-row xs:justify-between"
+                >
+                  <span class="text-xs text-gray-900 xs:text-sm">Page {{ currentPage }} of {{ Math.ceil(totalEntries / pageSize) }}</span>
+                  <div class="inline-flex mt-2 xs:mt-0">
+                    <button :disabled="currentPage === 1" class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-300 rounded-l hover:bg-gray-400" @click="prevPage">
+                      Prev
+                    </button>
+                    <button :disabled="currentPage * pageSize >= totalEntries" class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-300 rounded-r hover:bg-gray-400" @click="nextPage">
+                      Next
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Overlay -->
-    <div v-if="showModal" class="fixed inset-0 z-40 bg-gray-600 bg-opacity-50" />
+      <UploadContact v-if="showUploadModal" @close-modal="showUploadModal = false" @data-imported="handleDataImported" />
 
-    <!-- Modal à droite prenant toute la hauteur -->
-    <div v-if="showModal" class="fixed top-0 right-0 bottom-0 z-50 overflow-auto">
-      <div class="relative bg-white p-8 w-full sm:w-auto h-full flex flex-col rounded-l-lg shadow-lg">
-        <!-- En-tête de la modal -->
-        <div class="flex justify-between items-center pb-3">
-          <p class="text-2xl font-bold">
-            Edit User
-          </p>
-          <button class="p-2 bg-blue-500 rounded-full inline-flex items-center justify-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="toggleModal($event, -1)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" class="fill-current">
-              <path d="M12.707 11.293l-1.414 1.414L9 10.414l-2.293 2.293-1.414-1.414L7.586 9 5.293 6.707l1.414-1.414L9 7.586l2.293-2.293 1.414 1.414L10.414 9l2.293 2.293z" />
-            </svg>
-          </button>
-        </div>
+      <!-- Overlay -->
+      <div v-if="showModal" class="fixed inset-0 z-40 bg-gray-600 bg-opacity-50" />
 
-        <div>
-          <label class="text-gray-700" for="username">Name</label>
-          <input
-            v-model="currentContactName"
-            class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-            type="text"
-          >
-        </div>
-
-        <div>
-          <label class="text-gray-700" for="username">Title</label>
-          <input
-            v-model="currentContactTitle"
-            class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-            type="text"
-          >
-        </div>
-
-        <div>
-          <label class="text-gray-700" for="username">Company</label>
-          <input
-            v-model="currentContactCompany"
-            class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-            type="text"
-          >
-        </div>
-
-        <div>
-          <label class="text-gray-700" for="username">Industry</label>
-          <input
-            v-model="currentContactIndustry"
-            class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-            type="text"
-          >
-        </div>
-
-        <div>
-          <label class="text-gray-700" for="username">Email</label>
-          <input
-            v-model="currentContactEmail"
-            class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-            type="text"
-          >
-        </div>
-
-        <div>
-          <label class="text-gray-700" for="username">Phone</label>
-          <input
-            v-model="currentContactPhone"
-            class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-            type="text"
-          >
-        </div>
-
-        <div class="mt-auto pt-4 space-y-4">
-          <button class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 w-full focus:outline-none focus:ring" :disabled="isLoadingSave" @click="updateUser">
-            <div v-if="isLoadingSave" class="flex items-center">
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+      <!-- Modal à droite prenant toute la hauteur -->
+      <div v-if="showModal" class="fixed top-0 right-0 bottom-0 z-50 overflow-auto">
+        <div class="relative bg-white p-8 w-full sm:w-auto h-full flex flex-col rounded-l-lg shadow-lg">
+          <!-- En-tête de la modal -->
+          <div class="flex justify-between items-center pb-3">
+            <p class="text-2xl font-bold">
+              Edit User
+            </p>
+            <button class="p-2 bg-blue-500 rounded-full inline-flex items-center justify-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="toggleModal($event, -1)">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" class="fill-current">
+                <path d="M12.707 11.293l-1.414 1.414L9 10.414l-2.293 2.293-1.414-1.414L7.586 9 5.293 6.707l1.414-1.414L9 7.586l2.293-2.293 1.414 1.414L10.414 9l2.293 2.293z" />
               </svg>
-              {{ messageSaveDisplay }}
-            </div>
-            <div v-else>
-              {{ messageSaveDisplay }}
-            </div>
-          </button>
+            </button>
+          </div>
 
-          <button class="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 w-full focus:outline-none focus:ring" :disabled="isLoadingDelete" @click="deleteUser">
-            <div v-if="isLoadingDelete" class="flex items-center">
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              {{ messageDeleteDisplay }}
-            </div>
-            <div v-else>
-              {{ messageDeleteDisplay }}
-            </div>
-          </button>
+          <div>
+            <label class="text-gray-700" for="username">Name</label>
+            <input
+              v-model="currentContactName"
+              class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
+              type="text"
+            >
+          </div>
+
+          <div>
+            <label class="text-gray-700" for="username">Title</label>
+            <input
+              v-model="currentContactTitle"
+              class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
+              type="text"
+            >
+          </div>
+
+          <div>
+            <label class="text-gray-700" for="username">Company</label>
+            <input
+              v-model="currentContactCompany"
+              class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
+              type="text"
+            >
+          </div>
+
+          <div>
+            <label class="text-gray-700" for="username">Industry</label>
+            <input
+              v-model="currentContactIndustry"
+              class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
+              type="text"
+            >
+          </div>
+
+          <div>
+            <label class="text-gray-700" for="username">Email</label>
+            <input
+              v-model="currentContactEmail"
+              class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
+              type="text"
+            >
+          </div>
+
+          <div>
+            <label class="text-gray-700" for="username">Phone</label>
+            <input
+              v-model="currentContactPhone"
+              class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
+              type="text"
+            >
+          </div>
+
+          <div class="mt-auto pt-4 space-y-4">
+            <button class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 w-full focus:outline-none focus:ring" :disabled="isLoadingSave" @click="updateUser">
+              <div v-if="isLoadingSave" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                {{ messageSaveDisplay }}
+              </div>
+              <div v-else>
+                {{ messageSaveDisplay }}
+              </div>
+            </button>
+
+            <button class="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 w-full focus:outline-none focus:ring" :disabled="isLoadingDelete" @click="deleteUser">
+              <div v-if="isLoadingDelete" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                {{ messageDeleteDisplay }}
+              </div>
+              <div v-else>
+                {{ messageDeleteDisplay }}
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
   <div v-if="loading" class="flex flex-col items-center justify-center min-h-screen">
     <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900" />
     <p class="mt-3 text-lg text-gray-600">
@@ -657,7 +704,3 @@ const currentContactPhone = computed({
     </p> <!-- Texte de chargement -->
   </div>
 </template>
-
-function contact(value: Contact, index: number, obj: Contact[]): unknown {
-  throw new Error('Function not implemented.')
-}

@@ -32,4 +32,5 @@ export interface Contact {
   company_location: string
   email: string
   action: string
+  photo: string
 }

@@ -6,6 +6,7 @@ import LoginOAuth from './views/LoginOAuth.vue'
 import OAuthRedirect from './views/OAuthRedirect.vue'
 import Profile from './views/Profile.vue'
 import Contact from './views/Contact.vue'
+import Landing from './views/Landing.vue'
 import kobbleClient from './lib/kobbleClient'
 import { useRequestStore } from './store/request'
 
@@ -14,6 +15,12 @@ let store
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
+    name: 'Landing',
+    component: Landing,
+    meta: { layout: 'empty' },
+  },
+  {
+    path: '/login',
     name: 'Login',
     component: LoginOAuth,
     meta: { layout: 'empty' },
