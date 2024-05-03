@@ -85,7 +85,7 @@ const router = createRouter({
 
 // Guard global avant chaque route
 router.beforeEach(async (to, from, next) => {
-  if (to.path !== '/oauth-redirect') {
+  if (to.path !== '/oauth-redirect' && to.path !== '/') {
     const store = useRequestStore()
     const token = localStorage.getItem('bearer-token')
 
