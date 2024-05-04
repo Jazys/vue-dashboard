@@ -19,8 +19,8 @@ const showModal = ref(false)
 const currentContact = ref<Contact>()
 const isLoadingSave = ref(false)
 const isLoadingDelete = ref(false)
-const isLoadingEnrich = ref(false)
-const isLoadingSync = ref(false)
+const isLoadingEnrich = ref<boolean[]>([])
+const isLoadingSync = ref<boolean[]>([])
 const messageSaveDisplay = ref ('Save')
 const messageDeleteDisplay = ref ('Delete')
 const displaySuccess = ref(false)
@@ -34,8 +34,22 @@ const importedData = ref([])
 const showUploadModal = ref(false)
 
 async function handleDataImported(data: any) {
-  console.log(data)
-  const response = await ApiService.post<Contact>(endpoints.createContact, { idUser: userId.value, firstname: data[0].title })
+  try {
+    const response = await ApiService.post<Contact>(endpoints.createContact, { idUser: userId.value, firstname: data[0].title, name: data[0].title })
+
+    displaySuccess.value = true
+  }
+  catch (error) {
+    console.error('Error', error)
+    displayError.value = true
+  }
+  finally {
+    showUploadModal.value = false
+    setTimeout(() => {
+      displaySuccess.value = false
+      displayError.value = false
+    }, 2000)
+  }
 }
 
 onMounted(async () => {
@@ -79,15 +93,23 @@ async function getListAll() {
 }
 
 function updateDisplayedContacts() {
-  const filteredContacts = allContacts.value.filter(contact =>
-    contact.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
-  )
+  const filteredContacts = allContacts.value.filter((contact) => {
+    if (searchQuery.value.trim() === '')
+      return true // Ne filtre pas, inclut tous les contacts
+
+    // Effectue le filtrage si searchQuery est non vide
+    if (contact.name != null)
+      return contact.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+
+    return false
+  })
   totalEntries.value = filteredContacts.length
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
   displayedContacts.value = filteredContacts.slice(start, end)
-  console.log(displayedContacts.value[0].phone)
   displayedContactsOptionEnrich.value = Array(pageSize.value).fill('Both')
+  isLoadingEnrich.value = Array(pageSize.value).fill(false)
+  isLoadingSync.value = Array(pageSize.value).fill(false)
 }
 
 function nextPage() {
@@ -143,7 +165,7 @@ async function deleteUser() {
 
 async function enrichUser(id: number) {
   try {
-    isLoadingEnrich.value = true
+    isLoadingEnrich.value[id] = true
 
     const tabParameterForEnrich = []
     if (displayedContactsOptionEnrich.value[id] === 'Both') {
@@ -172,7 +194,7 @@ async function enrichUser(id: number) {
     displayError.value = true
   }
   finally {
-    isLoadingEnrich.value = false
+    isLoadingEnrich.value[id] = false
     setTimeout(() => {
       displaySuccess.value = false
       displayError.value = false
@@ -225,7 +247,7 @@ async function checkAllContactsStatus() {
 
 async function syncUser(id: number) {
   try {
-    isLoadingSync.value = true
+    isLoadingSync.value[id] = true
     const response = await ApiService.post<Contact>(endpoints.syncContact, { idContact: displayedContacts.value[id].id, idUser: userId.value })
 
     displaySuccess.value = true
@@ -235,7 +257,7 @@ async function syncUser(id: number) {
     displayError.value = true
   }
   finally {
-    isLoadingSync.value = false
+    isLoadingSync.value[id] = false
     setTimeout(() => {
       displaySuccess.value = false
       displayError.value = false
@@ -392,11 +414,6 @@ const currentContactPhone = computed({
             <div class="mt-2 sm:mt-0 space-x-4">
               <button
                 class="px-4 py-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
-              >
-                New contact
-              </button>
-              <button
-                class="px-4 py-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
                 @click="showUploadModal = true"
               >
                 Import List
@@ -405,7 +422,7 @@ const currentContactPhone = computed({
           </div>
 
           <div>
-            <div v-if="enrichissementPending" class="flex justify-center items-center p-4 mb-4 bg-blue-100 border border-blue-400 text-blue-700">
+            <div v-if="enrichissementPending" class="flex justify-center items-center p-4 mb-4 mt-4 bg-blue-100 border border-blue-400 text-blue-700">
               <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -484,7 +501,7 @@ const currentContactPhone = computed({
                       <td
                         class="px-5 py-5 text-sm bg-white border-b border-gray-200"
                       >
-                        <div class="flex flex-col items-start space-y-1">
+                        <div v-if="u.email != null" class="flex flex-col items-start space-y-1">
                           <p
                             v-for="(mail, indexMail) in u.email.split('\n')" :key="indexMail"
                             class="text-gray-900 whitespace-nowrap"
@@ -496,7 +513,8 @@ const currentContactPhone = computed({
                       <td class="px-5 py-5 text-sm bg-white border-b border-gray-200">
                         <div class="flex flex-col items-start space-y-1">
                           <span
-                            v-for="(phone, indexPhone) in u.phone.split('\n')" :key="indexPhone"
+                            v-for="(phone, indexPhone) in u.phone.split('\n')"
+                            v-if="u.phone != null" :key="indexPhone"
                             :class="`relative inline-block px-3 py-1 font-semibold text-${u.title}-900 leading-tight`"
                           >
                             <a :href="`tel:${phone.trim()}`">{{ phone.trim() }}</a>
@@ -515,8 +533,8 @@ const currentContactPhone = computed({
                             </div>
 
                             <div class="relative flex flex-col items-center group">
-                              <button class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingEnrich" @click="enrichUser(index)">
-                                <div v-if="isLoadingEnrich" class="flex items-center">
+                              <button class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingEnrich[index]" @click="enrichUser(index)">
+                                <div v-if="isLoadingEnrich[index]" class="flex items-center">
                                   <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -535,8 +553,8 @@ const currentContactPhone = computed({
                             </div>
 
                             <div class="relative flex flex-col items-center group">
-                              <button class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingSync" @click="syncUser(index)">
-                                <div v-if="isLoadingSync" class="flex items-center">
+                              <button class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingSync[index]" @click="syncUser(index)">
+                                <div v-if="isLoadingSync[index]" class="flex items-center">
                                   <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -591,7 +609,7 @@ const currentContactPhone = computed({
         </div>
       </div>
 
-      <UploadContact v-if="showUploadModal" @close-modal="showUploadModal = false" @data-imported="handleDataImported" />
+      <UploadContact v-if="showUploadModal" :user-id="userId" @close-modal="showUploadModal = false" @data-imported="handleDataImported" />
 
       <!-- Overlay -->
       <div v-if="showModal" class="fixed inset-0 z-40 bg-gray-600 bg-opacity-50" />

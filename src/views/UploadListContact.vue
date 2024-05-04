@@ -1,22 +1,29 @@
 <script setup lang="ts">
-import { defineEmits, ref } from 'vue'
+import { defineEmits, defineProps, ref } from 'vue'
 import Papa from 'papaparse'
+import ApiService from '../api/ApiService'
+import type { Contact } from '../types/apiTypes'
+import endpoints from '../api/endpoints'
+
+const props = defineProps<{
+  userId: string
+}>()
 
 const emits = defineEmits<{
   (event: 'close-modal', value: boolean): void
   (event: 'data-imported', data: any[]): void
 }>()
 
-const data = ref([])
+const data = ref<Contact[]>([])
+const isLoading = ref(false)
+let file: File | undefined
 
 function closeModal() {
   emits('close-modal', false)
 }
 
 function handleFileUpload(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (file)
-    parseCSV(file)
+  file = (event.target as HTMLInputElement).files?.[0]
 }
 
 async function parseCSV(file: File) {
@@ -32,9 +39,26 @@ async function parseCSV(file: File) {
     })
   })
 
-  // Stocke les données dans la variable 'data'
   data.value = results
+
+  // TODO - if request fail display information
+  for (let i = 0; i < data.value.length; i++) {
+    try {
+      await ApiService.post<Contact>(endpoints.createContact, { idUser: props.userId, firstname: data.value[0].title, name: data.value[0].title })
+    }
+    catch {
+
+    }
+  }
+
   emits('data-imported', data.value)
+}
+
+async function importContact() {
+  isLoading.value = true
+  if (file)
+    await parseCSV(file)
+  isLoading.value = false
 }
 </script>
 
@@ -54,8 +78,17 @@ async function parseCSV(file: File) {
         </div>
         <div class="flex items-center space-x-4">
           <input type="file" class="flex-grow" @change="handleFileUpload">
-          <button class="px-4 py-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700">
-            Importer
+          <button class="px-4 py-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700" @click="importContact">
+            <div v-if="isLoading" class="flex items-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Loading...
+            </div>
+            <div v-else>
+              Importer
+            </div>
           </button>
         </div>
       </div>

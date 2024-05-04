@@ -16,11 +16,13 @@ watch(() => requestStore.loading, async (loading) => {
       credits.value = quotaLeft[0].usage
       creditsLimit.value = quotaLeft[0].limit
     }
+    else {
+      redirectToLog()
+    }
   }
 })
 
 onMounted(async () => {
-  const route = useRoute()
   const isAuth = await kobbleClient.isAuthenticated()
   if (isAuth) {
     await kobbleClient.refreshAccessTokenIfExpired()
@@ -29,21 +31,26 @@ onMounted(async () => {
     creditsLimit.value = quotaLeft[0].limit
   }
   else {
-    if (route.path !== '/') {
-      setTimeout(async () => {
-        const isAuth = await kobbleClient.isAuthenticated()
-        if (isAuth === false) {
-          await kobbleClient.loginWithRedirect()
-        }
-        else {
-          const quotaLeft = await kobbleClient.acl.listQuotas()
-          credits.value = quotaLeft[0].usage
-          creditsLimit.value = quotaLeft[0].limit
-        }
-      }, 5000)
-    }
+    redirectToLog()
   }
 })
+
+function redirectToLog() {
+  const route = useRoute()
+  if (route.path !== '/') {
+    setTimeout(async () => {
+      const isAuth = await kobbleClient.isAuthenticated()
+      if (isAuth === false) {
+        await kobbleClient.loginWithRedirect()
+      }
+      else {
+        const quotaLeft = await kobbleClient.acl.listQuotas()
+        credits.value = quotaLeft[0].usage
+        creditsLimit.value = quotaLeft[0].limit
+      }
+    }, 5000)
+  }
+}
 </script>
 
 <template>

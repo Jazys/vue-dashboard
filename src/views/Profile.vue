@@ -15,6 +15,7 @@ const displayError = ref(false)
 const showCopyToast = ref(false)
 const toastCoordinates = ref({ x: 0, y: 0 })
 const isLoading = ref(false)
+const isLoadingPAccountAPI = ref(true)
 
 const userId = ref(localStorage.getItem('user-id') || '')
 const userMail = ref(localStorage.getItem('user-email') || '')
@@ -26,6 +27,7 @@ onMounted(async () => {
     inputValues.value[1].value = response[0].phantombuster
     inputValues.value[2].value = response[0].hubspot
   }
+  isLoadingPAccountAPI.value = false
 })
 
 async function copyToClipboard(url: string, event: any) {
@@ -166,7 +168,7 @@ async function saveData() {
     <div class="mt-4">
       <div class="p-6 bg-white rounded-md shadow-md">
         <h2 class="text-lg font-semibold text-gray-700 capitalize">
-          Account API
+          Account API <b v-if="isLoadingPAccountAPI"> (Loading ..)</b>
         </h2>
         <div v-for="(item, index) in inputValues" :key="index" class="flex flex-col space-y-2 mb-4">
           <label :for="`copyInput${index}`" class="text-gray-700">{{ item.label }} :</label>
