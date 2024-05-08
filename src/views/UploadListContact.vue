@@ -44,7 +44,7 @@ async function parseCSV(file: File) {
   // TODO - if request fail display information
   for (let i = 0; i < data.value.length; i++) {
     try {
-      await ApiService.post<Contact>(endpoints.createContact, { idUser: props.userId, firstname: data.value[0].title, name: data.value[0].title })
+      await ApiService.post<Contact>(endpoints.createContact, { idUser: props.userId, firstname: data.value[i].title, name: data.value[i].title })
     }
     catch {
 

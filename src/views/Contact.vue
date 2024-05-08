@@ -36,8 +36,6 @@ const titleModalCreateEdit = ref('')
 
 async function handleDataImported(data: any) {
   try {
-    const response = await ApiService.post<Contact>(endpoints.createContact, { idUser: userId.value, firstname: data[0].title, name: data[0].title })
-
     displaySuccess.value = true
   }
   catch (error) {
@@ -46,6 +44,10 @@ async function handleDataImported(data: any) {
   }
   finally {
     showUploadModal.value = false
+
+    // refresh page
+    refreshPage()
+
     setTimeout(() => {
       displaySuccess.value = false
       displayError.value = false
@@ -54,14 +56,7 @@ async function handleDataImported(data: any) {
 }
 
 onMounted(async () => {
-  loading.value = true
-  try {
-    await getListAll()
-  }
-  catch (error) {
-    console.error('Failed to fetch contacts:', error)
-  }
-  loading.value = false
+  refreshPage()
 })
 
 watch([pageSize, searchQuery, currentPage], () => {
@@ -72,6 +67,18 @@ watch(enrichissementPending, (newValue, oldValue) => {
   if (newValue === true)
     checkAllContactsStatus()
 })
+
+async function refreshPage() {
+  showModal.value = false
+  loading.value = true
+  try {
+    await getListAll()
+  }
+  catch (error) {
+    console.error('Failed to fetch contacts:', error)
+  }
+  loading.value = false
+}
 
 function toggleModal(event: MouseEvent, index: number) {
   event.preventDefault()
@@ -195,6 +202,7 @@ async function deleteUser() {
   }
   finally {
     isLoadingDelete.value = false
+    refreshPage()
     setTimeout(() => {
       messageDeleteDisplay.value = 'Delete'
     }, 2000)
@@ -214,6 +222,7 @@ async function createContact() {
   }
   finally {
     isLoadingSave.value = false
+    refreshPage()
     setTimeout(() => {
       messageSaveDisplay.value = 'Save'
     }, 2000)
