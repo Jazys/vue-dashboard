@@ -5,6 +5,30 @@ const isScrolled = ref(false)
 const isNavHidden = ref(true)
 
 const titleLanding = 'BuySignals'
+const heroTitle = 'Simplify your growth ops'
+const heroMessage = 'Synchronize your favorite tool\'s data in one place :'
+const bulletsInfo = ref(['Phantombuster', 'Fullenrich', 'HubSpot'])
+
+const headerSimpleLink = ref([])
+
+const price1Title = 'Free (forever)'
+const price2Title = '10€/month'
+const price3Title = 'Paid'
+const price1Info = ref(['10 actions/day', 'Sync from Phantombuster', 'Sync to HubSpot', 'Enrich with Fullenrich'])
+const price2Info = ref(['10 actions/day', 'Sync from Phantombuster', 'Sync to HubSpot', 'Enrich with Fullenrich'])
+const price3nfo = ref(['unlimited actions/day', 'Sync from Phantombuster', 'Sync to HubSpot', 'Enrich with Fullenrich'])
+
+const displaySectionFeature = true
+const displaySectionIinfo = false
+const displaySectionPrice = true
+const displayCallToAction = false
+
+const displayFooter1 = false
+const displayFooter2 = false
+const displayFooter3 = false
+const displayFooter4 = true
+
+const pricingMoreVisual = false
 
 function handleScroll() {
   isScrolled.value = window.scrollY > 10
@@ -51,14 +75,9 @@ onBeforeUnmount(() => {
         </div>
         <div id="nav-content" class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden mt-2 lg:mt-0 bg-white lg:bg-transparent text-black p-4 lg:p-0 z-20">
           <ul class="list-reset lg:flex justify-end flex-1 items-center">
-            <li class="mr-3">
-              <a class="inline-block py-2 px-4 text-black font-bold no-underline" href="#">Active</a>
-            </li>
-            <li class="mr-3">
-              <a class="inline-block text-black no-underline hover:text-gray-800 hover:text-underline py-2 px-4" href="#">link</a>
-            </li>
-            <li class="mr-3">
-              <a class="inline-block text-black no-underline hover:text-gray-800 hover:text-underline py-2 px-4" href="#">link</a>
+            <li v-for="(simpleLink, index) in headerSimpleLink" :key="index" class="mr-3">
+              <a v-if="index !== 0" class="inline-block text-black no-underline hover:text-gray-800 hover:text-underline py-2 px-4" href="#"> {{ simpleLink }}</a>
+              <a v-if="index === 0" class="inline-block py-2 px-4 text-black font-bold no-underline" href="#"> {{ simpleLink }}</a>
             </li>
           </ul>
           <router-link
@@ -81,17 +100,26 @@ onBeforeUnmount(() => {
         <!-- Left Column -->
         <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left">
           <p class="uppercase tracking-widest text-sm md:text-base">
-            What business are you?
+            Useful tool to
           </p>
           <h1 class="my-4 text-5xl md:text-6xl font-bold leading-tight">
-            Main Hero Message to sell yourself!
+            {{ heroTitle }}
           </h1>
           <p class="leading-normal text-xl md:text-2xl mb-8">
-            Sub-hero message, not too long and not too short. Make it just right!
+            {{ heroMessage }}
+            <ul class="list-disc pl-5">
+              <li v-for="(bullet, index) in bulletsInfo" :key="index">
+                {{ bullet }}
+              </li>
+            </ul>
           </p>
-          <button class="mx-auto lg:mx-0 hover:underline bg-white text-gray-800 font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out">
-            Use Service
-          </button>
+          <router-link
+            to="/login"
+          >
+            <button class="mx-auto lg:mx-0 hover:underline bg-white text-gray-800 font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out">
+              Start
+            </button>
+          </router-link>
         </div>
         <!-- Right Column -->
         <div class="w-full md:w-3/5 py-6 flex justify-center items-center">
@@ -438,7 +466,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </section>
-    <section class="bg-white border-b py-8">
+    <section v-if="displaySectionIinfo" class="bg-white border-b py-8">
       <div class="container mx-auto flex flex-wrap pt-4 pb-12">
         <h2 class="w-full my-2 text-5xl font-bold leading-tight text-center text-gray-800">
           Title
@@ -514,7 +542,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </section>
-    <section class="bg-gray-100 py-8">
+    <section v-if="displaySectionPrice" class="bg-gray-100 py-8">
       <div class="container mx-auto px-2 pt-4 pb-12 text-gray-800">
         <h2 class="w-full my-2 text-5xl font-bold leading-tight text-center text-gray-800">
           Pricing
@@ -526,50 +554,36 @@ onBeforeUnmount(() => {
           <div class="flex flex-col w-5/6 lg:w-1/4 mx-auto lg:mx-0 rounded-none lg:rounded-l-lg bg-white mt-4">
             <div class="flex-1 bg-white text-gray-600 rounded-t rounded-b-none overflow-hidden shadow">
               <div class="p-8 text-3xl font-bold text-center border-b-4">
-                Free
+                {{ price1Title }}
               </div>
               <ul class="w-full text-center text-sm">
-                <li class="border-b py-4">
-                  Thing
-                </li>
-                <li class="border-b py-4">
-                  Thing
-                </li>
-                <li class="border-b py-4">
-                  Thing
+                <li v-for="(priceInfo, index) in price1Info" :key="index" class="border-b py-4">
+                  <span class="font-bold">{{ priceInfo.split(' ')[0] }}</span> {{ priceInfo.substring(priceInfo.indexOf(' ') + 1) }}
                 </li>
               </ul>
             </div>
             <div class="flex-none mt-auto bg-white rounded-b rounded-t-none overflow-hidden shadow p-6">
               <div class="w-full pt-6 text-3xl text-gray-600 font-bold text-center">
-                £0
+                0€
                 <span class="text-base">for one user</span>
               </div>
               <div class="flex items-center justify-center">
                 <button class="mx-auto lg:mx-0 hover:underline gradient text-white font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out">
-                  Sign Up
+                  Start
                 </button>
               </div>
             </div>
           </div>
-          <div class="flex flex-col w-5/6 lg:w-1/3 mx-auto lg:mx-0 rounded-lg bg-white mt-4 sm:-mt-6 shadow-lg z-10">
+          <div v-if="!pricingMoreVisual" class="hidden lg:block w-1/12" />
+          <div v-if="pricingMoreVisual" class="flex flex-col w-5/6 lg:w-1/3 mx-auto lg:mx-0 rounded-lg bg-white mt-4 sm:-mt-6 shadow-lg z-10">
             <div class="flex-1 bg-white rounded-t rounded-b-none overflow-hidden shadow">
               <div class="w-full p-8 text-3xl font-bold text-center">
-                Basic
+                {{ price2Title }}
               </div>
               <div class="h-1 w-full gradient my-0 py-0 rounded-t" />
               <ul class="w-full text-center text-base font-bold">
-                <li class="border-b py-4">
-                  Thing
-                </li>
-                <li class="border-b py-4">
-                  Thing
-                </li>
-                <li class="border-b py-4">
-                  Thing
-                </li>
-                <li class="border-b py-4">
-                  Thing
+                <li v-for="(priceInfo, index) in price2Info" :key="index" class="border-b py-4">
+                  {{ priceInfo }}
                 </li>
               </ul>
             </div>
@@ -588,28 +602,22 @@ onBeforeUnmount(() => {
           <div class="flex flex-col w-5/6 lg:w-1/4 mx-auto lg:mx-0 rounded-none lg:rounded-l-lg bg-white mt-4">
             <div class="flex-1 bg-white text-gray-600 rounded-t rounded-b-none overflow-hidden shadow">
               <div class="p-8 text-3xl font-bold text-center border-b-4">
-                Pro
+                {{ price3Title }}
               </div>
               <ul class="w-full text-center text-sm">
-                <li class="border-b py-4">
-                  Thing
-                </li>
-                <li class="border-b py-4">
-                  Thing
-                </li>
-                <li class="border-b py-4">
-                  Thing
+                <li v-for="(priceInfo, index) in price3nfo" :key="index" class="border-b py-4">
+                  <span class="font-bold">{{ priceInfo.split(' ')[0] }}</span> {{ priceInfo.substring(priceInfo.indexOf(' ') + 1) }}
                 </li>
               </ul>
             </div>
             <div class="flex-none mt-auto bg-white rounded-b rounded-t-none overflow-hidden shadow p-6">
               <div class="w-full pt-6 text-3xl text-gray-600 font-bold text-center">
-                £x.99
+                10€
                 <span class="text-base">/ per user</span>
               </div>
               <div class="flex items-center justify-center">
                 <button class="mx-auto lg:mx-0 hover:underline gradient text-white font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out">
-                  Sign Up
+                  Start
                 </button>
               </div>
             </div>
@@ -639,7 +647,7 @@ onBeforeUnmount(() => {
         </g>
       </g>
     </svg>
-    <section class="container mx-auto text-center py-6 mb-12">
+    <section v-if="displayCallToAction" class="container mx-auto text-center py-6 mb-12">
       <h2 class="w-full my-2 text-5xl font-bold leading-tight text-center text-white">
         Call to Action
       </h2>
@@ -667,73 +675,81 @@ onBeforeUnmount(() => {
                   d=" M 510.7 189.151 C 505.271 168.95 484.565 156.956 464.365 162.385 L 330.156 198.367 L 155.924 35.878 L 107.19 49.008 L 211.729 230.183 L 86.232 263.767 L 36.614 224.754 L 0 234.603 L 45.957 314.27 L 65.274 347.727 L 105.802 336.869 L 240.011 300.886 L 349.726 271.469 L 483.935 235.486 C 504.134 230.057 516.129 209.352 510.7 189.151 Z "
                 />
               </svg>
-              LANDING
+              {{ titleLanding }}
             </a>
           </div>
           <div class="flex-1">
-            <p class="uppercase text-gray-500 md:mb-6">
-              Links
-            </p>
-            <ul class="list-reset mb-6">
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">FAQ</a>
-              </li>
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Help</a>
-              </li>
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Support</a>
-              </li>
-            </ul>
+            <div v-if="displayFooter1">
+              <p class="uppercase text-gray-500 md:mb-6">
+                Links
+              </p>
+              <ul class="list-reset mb-6">
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">FAQ</a>
+                </li>
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Help</a>
+                </li>
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Support</a>
+                </li>
+              </ul>
+            </div>
           </div>
           <div class="flex-1">
-            <p class="uppercase text-gray-500 md:mb-6">
-              Legal
-            </p>
-            <ul class="list-reset mb-6">
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Terms</a>
-              </li>
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Privacy</a>
-              </li>
-            </ul>
+            <div v-if="displayFooter2">
+              <p class="uppercase text-gray-500 md:mb-6">
+                Legal
+              </p>
+              <ul class="list-reset mb-6">
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Terms</a>
+                </li>
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Privacy</a>
+                </li>
+              </ul>
+            </div>
           </div>
           <div class="flex-1">
-            <p class="uppercase text-gray-500 md:mb-6">
-              Social
-            </p>
-            <ul class="list-reset mb-6">
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Facebook</a>
-              </li>
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Linkedin</a>
-              </li>
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Twitter</a>
-              </li>
-            </ul>
+            <div v-if="displayFooter3">
+              <p class="uppercase text-gray-500 md:mb-6">
+                Social
+              </p>
+              <ul class="list-reset mb-6">
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Facebook</a>
+                </li>
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Linkedin</a>
+                </li>
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Twitter</a>
+                </li>
+              </ul>
+            </div>
           </div>
           <div class="flex-1">
-            <p class="uppercase text-gray-500 md:mb-6">
-              Company
-            </p>
-            <ul class="list-reset mb-6">
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Official Blog</a>
-              </li>
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">About Us</a>
-              </li>
-              <li class="mt-2 inline-block mr-2 md:block md:mr-0">
-                <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Contact</a>
-              </li>
-            </ul>
+            <div v-if="displayFooter4">
+              <p class="uppercase text-gray-500 md:mb-6">
+                Company
+              </p>
+              <ul class="list-reset mb-6">
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Support</a>
+                </li>
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Contact</a>
+                </li>
+                <li class="mt-2 inline-block mr-2 md:block md:mr-0">
+                  <a href="#" class="no-underline hover:underline text-gray-800 hover:text-pink-500">Terms and Conditions</a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-      <a href="https://www.freepik.com/free-photos-vectors/background" class="text-gray-500">Background vector created by freepik - www.freepik.com</a>
+      <a href="https://www.freepik.com/free-photos-vectors/background" class="text-gray-500" />
     </footer>
   </div>
 </template>
