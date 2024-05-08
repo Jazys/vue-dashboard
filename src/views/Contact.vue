@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import axios from 'axios'
 import { computed, onMounted, ref, watch } from 'vue'
 import ApiService from '../api/ApiService'
 import endpoints from '../api/endpoints'
@@ -32,6 +31,8 @@ const enrichissementPending = ref(false)
 
 const importedData = ref([])
 const showUploadModal = ref(false)
+
+const titleModalCreateEdit = ref('')
 
 async function handleDataImported(data: any) {
   try {
@@ -74,8 +75,45 @@ watch(enrichissementPending, (newValue, oldValue) => {
 
 function toggleModal(event: MouseEvent, index: number) {
   event.preventDefault()
-  if (index !== -1)
+  if (index !== -1) {
+    messageSaveDisplay.value = 'Save'
     currentContact.value = displayedContacts.value[index]
+    titleModalCreateEdit.value = 'Edit User'
+  }
+  else {
+    const newContact: Contact = {
+      id: -1,
+      name: '',
+      title: '',
+      company: '',
+      phone: '',
+      comment: '',
+      linkedin_profile: '',
+      linkedin_url: '',
+      firstname: '',
+      lastname: '',
+      vmid: '',
+      vmid_2: '',
+      created_date: new Date(),
+      hs_id: 1,
+      deleted: false,
+      area: '',
+      status: '',
+      PK: '',
+      Employees: '',
+      linkedin_company_url: '',
+      user: '',
+      industry: '',
+      company_location: '',
+      email: '',
+      action: '',
+      photo: '',
+    }
+
+    currentContact.value = newContact
+    messageSaveDisplay.value = 'Create'
+    titleModalCreateEdit.value = 'Create User'
+  }
   showModal.value = !showModal.value
 }
 
@@ -130,7 +168,6 @@ async function updateUser() {
   try {
     isLoadingSave.value = true
     const response = await ApiService.patch<Contact>(endpoints.patchContact, { contact: currentContact.value })
-    console.log(response)
     messageSaveDisplay.value = 'Succes !'
   }
   catch (error) {
@@ -148,7 +185,8 @@ async function updateUser() {
 async function deleteUser() {
   try {
     isLoadingDelete.value = true
-    await axios.post('/api/user/activate', { currentContact })
+    if (currentContact.value !== undefined)
+      await ApiService.delete<Contact>(endpoints.deleteContact, { contact: currentContact.value })
     messageDeleteDisplay.value = 'Succes !'
   }
   catch (error) {
@@ -159,6 +197,25 @@ async function deleteUser() {
     isLoadingDelete.value = false
     setTimeout(() => {
       messageDeleteDisplay.value = 'Delete'
+    }, 2000)
+  }
+}
+
+async function createContact() {
+  try {
+    isLoadingSave.value = true
+    const response = await ApiService.post<Contact>(endpoints.createContact, { contact: currentContact.value })
+
+    messageSaveDisplay.value = 'Succes !'
+  }
+  catch (error) {
+    console.error('Error', error)
+    messageSaveDisplay.value = 'Error !'
+  }
+  finally {
+    isLoadingSave.value = false
+    setTimeout(() => {
+      messageSaveDisplay.value = 'Save'
     }, 2000)
   }
 }
@@ -407,11 +464,17 @@ const currentContactPhone = computed({
               <input
                 v-model="searchQuery"
                 placeholder="Search"
-                class="block w-full py-2 pl-8 pr-6 text-sm text-gray-700 placeholder-gray-400 bg-white border border-b border-gray-400 rounded-l rounded-r appearance-none sm:rounded-l-none focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"
+                class="block w-full py-2 pl-8 pr-6 text-sm text-gray-700 placeholder-gray-400 bg-white border border-b border-gray-400 rounded-full appearance-none focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"
               >
             </div>
 
             <div class="mt-2 sm:mt-0 space-x-4">
+              <button
+                class="px-4 py-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
+                @click="toggleModal($event, -1)"
+              >
+                New Contact
+              </button>
               <button
                 class="px-4 py-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700"
                 @click="showUploadModal = true"
@@ -439,26 +502,31 @@ const currentContactPhone = computed({
                     <tr>
                       <th
                         class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 15%;"
                       >
-                        User
+                        Name
                       </th>
                       <th
                         class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 30%;"
                       >
                         Company
                       </th>
                       <th
                         class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 15%;"
                       >
                         Email
                       </th>
                       <th
                         class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 10%;"
                       >
                         Phone
                       </th>
                       <th
                         class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 20%;"
                       >
                         Action
                       </th>
@@ -467,7 +535,7 @@ const currentContactPhone = computed({
                   <tbody>
                     <tr v-for="(u, index) in displayedContacts" :key="index">
                       <td
-                        class="px-5 py-5 text-sm bg-white border-b border-gray-200"
+                        class="px-5 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
                       >
                         <div class="flex items-center">
                           <div class="flex-shrink-0 w-10 h-10">
@@ -489,17 +557,19 @@ const currentContactPhone = computed({
                         </div>
                       </td>
                       <td
-                        class="px-5 py-5 text-sm bg-white border-b border-gray-200"
+                        class="px-5 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
                       >
-                        <p class="text-gray-900 whitespace-nowrap font-bold">
-                          {{ u.company }}
-                        </p>
-                        <p class="text-gray-900 whitespace-nowrap">
-                          {{ u.industry }}
-                        </p>
+                        <div class="max-w-md overflow-x-hidden">
+                          <p class="text-gray-900 whitespace-nowrap font-bold">
+                            {{ u.company }}
+                          </p>
+                          <p class="text-gray-900 whitespace-nowrap">
+                            {{ u.industry }}
+                          </p>
+                        </div>
                       </td>
                       <td
-                        class="px-5 py-5 text-sm bg-white border-b border-gray-200"
+                        class="px-5 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
                       >
                         <div v-if="u.email != null" class="flex flex-col items-start space-y-1">
                           <p
@@ -510,7 +580,7 @@ const currentContactPhone = computed({
                           </p>
                         </div>
                       </td>
-                      <td class="px-5 py-5 text-sm bg-white border-b border-gray-200">
+                      <td class="px-5 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden">
                         <div class="flex flex-col items-start space-y-1">
                           <span
                             v-for="(phone, indexPhone) in u.phone.split('\n')"
@@ -620,7 +690,7 @@ const currentContactPhone = computed({
           <!-- En-tête de la modal -->
           <div class="flex justify-between items-center pb-3">
             <p class="text-2xl font-bold">
-              Edit User
+              {{ titleModalCreateEdit }}
             </p>
             <button class="p-2 bg-blue-500 rounded-full inline-flex items-center justify-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="toggleModal($event, -1)">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" class="fill-current">
@@ -684,7 +754,7 @@ const currentContactPhone = computed({
           </div>
 
           <div class="mt-auto pt-4 space-y-4">
-            <button class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 w-full focus:outline-none focus:ring" :disabled="isLoadingSave" @click="updateUser">
+            <button v-if="titleModalCreateEdit === 'Edit User'" class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 w-full focus:outline-none focus:ring" :disabled="isLoadingSave" @click="updateUser">
               <div v-if="isLoadingSave" class="flex items-center">
                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -697,7 +767,20 @@ const currentContactPhone = computed({
               </div>
             </button>
 
-            <button class="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 w-full focus:outline-none focus:ring" :disabled="isLoadingDelete" @click="deleteUser">
+            <button v-if="titleModalCreateEdit === 'Create User'" class="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded hover:bg-blue-600 w-full focus:outline-none focus:ring" :disabled="isLoadingSave" @click="createContact">
+              <div v-if="isLoadingSave" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                {{ messageSaveDisplay }}
+              </div>
+              <div v-else>
+                {{ messageSaveDisplay }}
+              </div>
+            </button>
+
+            <button v-if="titleModalCreateEdit === 'Edit User'" class="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 w-full focus:outline-none focus:ring" :disabled="isLoadingDelete" @click="deleteUser">
               <div v-if="isLoadingDelete" class="flex items-center">
                 <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />

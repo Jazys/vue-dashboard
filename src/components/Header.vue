@@ -17,6 +17,7 @@ async function logout() {
 }
 
 const dropdownOpen = ref(false)
+const enableNotif = ref(false)
 const { isOpen } = useSidebar()
 </script>
 
@@ -49,7 +50,7 @@ const { isOpen } = useSidebar()
     <div class="flex items-center">
       <Credits credits="credits" />
 
-      <button class="flex mx-4 text-gray-600 focus:outline-none">
+      <button v-if="enableNotif" class="flex mx-4 text-gray-600 focus:outline-none">
         <svg
           class="w-6 h-6"
           viewBox="0 0 24 24"
@@ -66,14 +67,14 @@ const { isOpen } = useSidebar()
         </svg>
       </button>
 
-      <div class="relative">
+      <div class="flex mx-4 text-gray-600 focus:outline-none">
         <button
           class="relative z-10 block w-8 h-8 overflow-hidden rounded-full shadow focus:outline-none"
           @click="dropdownOpen = !dropdownOpen"
         >
           <img
             class="object-cover w-full h-full"
-            src="https://images.unsplash.com/photo-1528892952291-009c663ce843?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=296&q=80"
+            src="https://static.vecteezy.com/system/resources/thumbnails/002/534/006/small/social-media-chatting-online-blank-profile-picture-head-and-body-icon-people-standing-icon-grey-background-free-vector.jpg"
             alt="Your avatar"
           >
         </button>

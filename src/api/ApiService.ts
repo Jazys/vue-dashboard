@@ -54,6 +54,10 @@ class ApiService {
   patch<T>(resource: string, data: any): Promise<T> {
     return this.axios.patch<T>(resource, data).then((response: { data: any }) => response.data)
   }
+
+  delete<T>(resource: string, data: any): Promise<T> {
+    return this.axios.delete<T>(resource, data).then((response: { data: any }) => response.data)
+  }
 }
 
 export default new ApiService()

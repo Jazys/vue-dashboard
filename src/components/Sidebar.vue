@@ -24,6 +24,10 @@ function handleMouseEnter() {
 function handleMouseLeave() {
   isExpanded.value = false
 }
+
+function toggleSidebar() {
+  isExpanded.value = !isExpanded.value
+}
 </script>
 
 <template>
@@ -39,7 +43,6 @@ function handleMouseLeave() {
     <div
       :class="isOpen ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'"
       class="fixed inset-y-0 left-0 z-30 w-50 overflow-y-auto transition duration-300 transform bg-gray-900 lg:translate-x-0 lg:static lg:inset-0"
-      @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave"
     >
       <div class="flex items-center justify-center mt-8">
         <div class="flex items-center">
@@ -101,6 +104,20 @@ function handleMouseLeave() {
           <span v-if="isExpanded" class="mx-4">Contact</span>
         </router-link>
       </nav>
+
+      <button
+        class="p-2 m-4 bg-blue-900 text-white fixed bottom-0 right-0 mb-4 mr-4 rounded-full shadow-lg hover:bg-blue-600"
+        aria-label="Toggle Sidebar"
+        @click="toggleSidebar"
+      >
+        <svg v-if="!isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+
+        <svg v-if="isExpanded" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
     </div>
   </div>
 </template>

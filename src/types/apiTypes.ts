@@ -16,7 +16,7 @@ export interface Contact {
   linkedin_profile: string
   linkedin_url: string
   firstname: string
-  lastanme: string
+  lastname: string
   vmid: string
   vmid_2: string
   created_date: Date

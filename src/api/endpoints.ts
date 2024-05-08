@@ -8,6 +8,7 @@ const endpoints = {
   patchContact: 'c5cddded-7fea-4c8c-95d5-83eeab6e7cbf',
   createContact: 'create-contact',
   syncContact: 'hubspot-sync',
+  deleteContact: 'delete-contact',
   enrich: 'enrich',
 }
 
