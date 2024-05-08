@@ -186,7 +186,7 @@ async function deleteUser() {
   try {
     isLoadingDelete.value = true
     if (currentContact.value !== undefined)
-      await ApiService.delete<Contact>(endpoints.deleteContact, { contact: currentContact.value })
+      await ApiService.delete<Contact>(endpoints.deleteContact, { idUser: userId.value, idContact: currentContact.value.id })
     messageDeleteDisplay.value = 'Succes !'
   }
   catch (error) {
