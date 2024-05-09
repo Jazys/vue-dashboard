@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
+const serverUrl = 'http://127.0.0.1/mail'
+
 const isScrolled = ref(false)
 const isNavHidden = ref(true)
+const modalWaitList = ref(false)
+const mail = ref('')
 
-const titleLanding = 'BuySignals'
+const titleLanding = 'PreCRM'
 const heroTitle = 'Simplify your growth ops'
 const heroMessage = 'Synchronize your favorite tool\'s data in one place :'
 const bulletsInfo = ref(['Phantombuster', 'Fullenrich', 'HubSpot'])
@@ -26,6 +30,8 @@ const subtitleTextFeature2 = 'Simply use your API key fullenrich to discover all
 
 const finalMergeFeature = 'After Synchronize your contact with Hubspot for your commercial team'
 
+const textForWaitList = 'Be the first to unlock full access'
+
 const displaySectionFeature = true
 const displaySectionIinfo = false
 const displaySectionPrice = true
@@ -44,6 +50,27 @@ function handleScroll() {
 
 function toggleNav() {
   isNavHidden.value = !isNavHidden.value
+}
+
+async function sendToList() {
+  try {
+    const response = await fetch(serverUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: mail.value }),
+    })
+
+    if (!response.ok)
+      throw new Error('Failed to submit form')
+  }
+  catch (error) {
+    console.error('Error submitting form:', error)
+    // Gérer l'erreur ici, afficher un message d'erreur, etc.
+  }
+
+  modalWaitList.value = false
 }
 
 onMounted(() => {
@@ -132,6 +159,41 @@ onBeforeUnmount(() => {
         <!-- Right Column -->
         <div class="w-full md:w-3/5 py-6 flex justify-center items-center">
           <img class="w-full md:w-4/5 z-50" src="../assets/hero.png" alt="Hero Image">
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlay -->
+    <div v-if="modalWaitList" class="fixed inset-0 z-40 bg-gray-600 bg-opacity-50" />
+
+    <!-- Modal au centre prenant toute la hauteur -->
+    <div v-if="modalWaitList" class="fixed top-0 left-0 right-0 bottom-0 z-50 flex items-center justify-center">
+      <div class="relative bg-white bg-opacity-90 p-8 w-full sm:w-auto flex flex-col rounded-l-lg shadow-lg">
+        <!-- Croix pour fermer la modal -->
+        <button class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 focus:outline-none" @click="modalWaitList = false">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <!-- En-tête de la modal -->
+        <div id="waitlist" class="flex flex-col">
+          <div class="text-4xl font-semibold max-w-xl text-center px-4">
+            <span class="text-purple-500">{{ textForWaitList }}</span>
+          </div>
+          <div>
+            <div class="flex justify-center">
+              <div class="flex mt-6 flex-col md:flex-row">
+                <div class="sm:col-span-4 mt-4">
+                  <div class="flex rounded-xl shadow-sm ring-1 ring-inset ring-gray-300 focus:none sm:max-w-md mr-2">
+                    <input id="email" v-model="mail" type="email" name="email" autocomplete="email" value="" class="w-72 h-14 rounded-xl block flex-1 bg-transparent py-4 pl-4 text-gray-900 placeholder:text-gray-400 focus:none sm:text-md sm:leading-6 text-lg" placeholder="Enter your e-mail">
+                  </div>
+                </div>
+                <button class="mx-auto bg-blue-700 text-white px-6 py-2 rounded-xl shadow border font-medium mt-4 text-xl hover:brightness-90" @click="sendToList()">
+                  Get Early Access
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -500,13 +562,12 @@ onBeforeUnmount(() => {
                 <span class="text-base">/ per user</span>
               </div>
               <div class="flex items-center justify-center">
-                <router-link
-                  to="/login"
+                <button
+                  class="mx-auto lg:mx-0 hover:underline gradient text-white font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out"
+                  @click="modalWaitList = true"
                 >
-                  <button class="mx-auto lg:mx-0 hover:underline gradient text-white font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out">
-                    Start
-                  </button>
-                </router-link>
+                  Join List
+                </button>
               </div>
             </div>
           </div>

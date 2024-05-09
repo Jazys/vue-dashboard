@@ -183,6 +183,7 @@ async function updateUser() {
   }
   finally {
     isLoadingSave.value = false
+    showModal.value = false
     setTimeout(() => {
       messageSaveDisplay.value = 'Save'
     }, 2000)
