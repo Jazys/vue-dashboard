@@ -66,7 +66,7 @@ function toggleSidebar() {
             />
           </svg>
 
-          <span v-if="isExpanded" class="mx-2 text-2xl font-semibold text-white">BuyingSignal</span>
+          <span v-if="isExpanded" class="mx-2 text-2xl font-semibold text-white">PreCRM</span>
         </div>
       </div>
 

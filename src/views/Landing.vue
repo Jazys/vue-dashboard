@@ -131,34 +131,32 @@ onBeforeUnmount(() => {
     </nav>
     <!-- Hero -->
     <div class="pt-10">
-      <div class="container mx-auto flex flex-wrap items-center justify-between px-6">
+      <div class="container mx-auto flex flex-wrap items-center justify-between px-6 mt-5">
         <!-- Left Column -->
         <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left">
-          <p class="uppercase tracking-widest text-sm md:text-base">
-            Useful tool to
-          </p>
-          <h1 class="my-4 text-5xl md:text-6xl font-bold leading-tight">
-            {{ heroTitle }}
-          </h1>
-          <p class="leading-normal text-xl md:text-2xl mb-8">
-            {{ heroMessage }}
-            <ul class="list-disc pl-5">
-              <li v-for="(bullet, index) in bulletsInfo" :key="index">
-                {{ bullet }}
-              </li>
-            </ul>
-          </p>
-          <router-link
-            to="/login"
-          >
-            <button class="mx-auto lg:mx-0 hover:underline bg-white text-gray-800 font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out">
+          <div class="container mx-auto flex flex-wrap items-center justify-between px-10">
+            <p class="uppercase tracking-widest text-sm md:text-base">
+              Useful tool to
+            </p>
+            <h1 class="my-4 text-5xl md:text-6xl font-bold leading-tight">
+              {{ heroTitle }}
+            </h1>
+            <p class="leading-normal text-xl md:text-2xl mb-8">
+              {{ heroMessage }}
+              <ul class="list-disc pl-5">
+                <li v-for="(bullet, index) in bulletsInfo" :key="index">
+                  {{ bullet }}
+                </li>
+              </ul>
+            </p>
+            <button class="mx-auto lg:mx-0 hover:underline bg-white text-gray-800 font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out" @click="$router.push('/login')">
               Start
             </button>
-          </router-link>
+          </div>
         </div>
         <!-- Right Column -->
         <div class="w-full md:w-3/5 py-6 flex justify-center items-center">
-          <img class="w-full md:w-4/5 z-50" src="../assets/hero.png" alt="Hero Image">
+          <img src="../assets/hero2.png" alt="Hero Image">
         </div>
       </div>
     </div>

@@ -44,7 +44,7 @@ async function login() {
             fill="white"
           />
         </svg>
-        <span class="text-2xl font-semibold text-gray-700">BuyingSignal</span>
+        <span class="text-2xl font-semibold text-gray-700">PreCRM</span>
       </div>
 
       <form class="mt-4" @submit.prevent="login">
