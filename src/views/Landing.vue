@@ -22,11 +22,11 @@ const price1Info = ref(['10 actions/day', 'Sync from Phantombuster', 'Sync to Hu
 const price2Info = ref(['10 actions/day', 'Sync from Phantombuster', 'Sync to HubSpot', 'Enrich with Fullenrich'])
 const price3nfo = ref(['unlimited actions/day', 'Sync from Phantombuster', 'Sync to HubSpot', 'Enrich with Fullenrich'])
 
-const textFeature1 = 'Grab profil from your linkedin post, facebook, instagram'
-const subtitleTextFeature1 = 'Raw data often requires refinement to maximize its utility. Our tool excels in streamlining this process, simplifying the complexities and enhancing the value of contact information effortlessly'
+const textFeature1 = 'Import your scrap directly from Phantombuster'
+const subtitleTextFeature1 = 'Jsut copy your link into your phantombuster agent and start receiving your contacts.'
 
-const textFeature2 = 'Enrich your contact to find mail and phone '
-const subtitleTextFeature2 = 'Simply use your API key fullenrich to discover all informations that commercial need'
+const textFeature2 = 'Enrich each contact individually '
+const subtitleTextFeature2 = 'We provide an integration with fullenrich that let you enrich email or phone or both'
 
 const finalMergeFeature = 'After Synchronize your contact with Hubspot for your commercial team'
 
@@ -131,14 +131,14 @@ onBeforeUnmount(() => {
     </nav>
     <!-- Hero -->
     <div class="pt-10">
-      <div class="container mx-auto flex flex-wrap items-center justify-between px-6 mt-5">
+      <div class="container mx-auto flex flex-wrap items-center justify-between px-4 mt-5">
         <!-- Left Column -->
         <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left">
-          <div class="container mx-auto flex flex-wrap items-center justify-between px-10">
+          <div class="container mx-auto flex flex-wrap items-center justify-between px-2">
             <p class="uppercase tracking-widest text-sm md:text-base">
               Useful tool to
             </p>
-            <h1 class="my-4 text-5xl md:text-6xl font-bold leading-tight">
+            <h1 class="my-4 text-5xl md:text-5xl font-bold leading-tight">
               {{ heroTitle }}
             </h1>
             <p class="leading-normal text-xl md:text-2xl mb-8">
