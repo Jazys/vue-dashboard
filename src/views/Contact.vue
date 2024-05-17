@@ -243,7 +243,7 @@ async function enrichUser(id: number) {
       tabParameterForEnrich.push('contact.phones')
     }
 
-    else if (displayedContactsOptionEnrich.value[id] === 'Mail') {
+    else if (displayedContactsOptionEnrich.value[id] === 'Email') {
       tabParameterForEnrich.push('contact.emails')
     }
 
