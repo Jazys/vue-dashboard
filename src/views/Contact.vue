@@ -518,19 +518,19 @@ const currentContactPhone = computed({
                       </th>
                       <th
                         class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                        style="width: 30%;"
+                        style="width: 23%;"
                       >
                         Company
                       </th>
                       <th
                         class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                        style="width: 15%;"
+                        style="width: 16%;"
                       >
                         Email
                       </th>
                       <th
                         class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                        style="width: 10%;"
+                        style="width: 16%;"
                       >
                         Phone
                       </th>
@@ -561,7 +561,7 @@ const currentContactPhone = computed({
                               {{ u.name }}
                             </p>
                             <p class="text-gray-900 whitespace-nowrap">
-                              {{ u.title }}
+                              {{ u.title.length > 30 ? `${u.title.substring(0, 30)}...` : u.title }}
                             </p>
                           </div>
                         </div>
@@ -570,11 +570,11 @@ const currentContactPhone = computed({
                         class="px-5 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
                       >
                         <div class="max-w-md overflow-x-hidden">
-                          <p class="text-gray-900 whitespace-nowrap font-bold">
-                            {{ u.company }}
+                          <p v-if="u.company != null" class="text-gray-900 whitespace-nowrap font-bold">
+                            {{ u.company.length > 40 ? `${u.company.substring(0, 40)}...` : u.company }}
                           </p>
-                          <p class="text-gray-900 whitespace-nowrap">
-                            {{ u.industry }}
+                          <p v-if="u.industry != null" class="text-gray-900 whitespace-nowrap">
+                            {{ u.industry.length > 40 ? `${u.industry.substring(0, 40)}...` : u.industry }}
                           </p>
                         </div>
                       </td>
