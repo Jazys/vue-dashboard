@@ -133,7 +133,7 @@ onBeforeUnmount(() => {
     <div class="pt-10">
       <div class="container mx-auto flex flex-wrap items-center justify-between px-4 mt-5">
         <!-- Left Column -->
-        <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left">
+        <div class="flex flex-col w-full md:w-2/5 justify-center items-start text-center md:text-left relative">
           <div class="container mx-auto flex flex-wrap items-center justify-between px-2">
             <p class="uppercase tracking-widest text-sm md:text-base">
               Useful tool to
@@ -149,14 +149,14 @@ onBeforeUnmount(() => {
                 </li>
               </ul>
             </p>
-            <button class="mx-auto lg:mx-0 hover:underline bg-white text-gray-800 font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out" @click="$router.push('/login')">
+            <button class="mx-auto lg:mx-0 hover:underline bg-white text-gray-800 font-bold rounded-full my-6 py-4 px-8 shadow-lg focus:outline-none focus:shadow-outline transform transition hover:scale-105 duration-300 ease-in-out z-10" @click="$router.push('/login')">
               Start
             </button>
           </div>
         </div>
         <!-- Right Column -->
-        <div class="w-full md:w-3/5 py-6 flex justify-center items-center">
-          <img src="../assets/hero2.png" alt="Hero Image">
+        <div class="w-full md:w-3/5 py-6 flex justify-center items-center relative">
+          <img src="../assets/hero2.png" alt="Hero Image" class="relative z-0">
         </div>
       </div>
     </div>
