@@ -29,6 +29,9 @@ const needCheckStatus = ref(false)
 
 const enrichissementPending = ref(false)
 
+const dropdownVisible = ref(['Both', 'Email', 'Phone'])
+const dropdownVisibleState = ref(Array(pageSize.value).fill(false))
+
 const importedData = ref([])
 const showUploadModal = ref(false)
 
@@ -67,6 +70,20 @@ watch(enrichissementPending, (newValue, oldValue) => {
   if (newValue === true)
     checkAllContactsStatus()
 })
+
+function toggleDropdown(index: number) {
+  dropdownVisibleState.value[index] = !dropdownVisibleState.value[index]
+  dropdownVisibleState.value.forEach((_, i) => {
+    if (i !== index)
+      dropdownVisibleState.value[i] = false
+  })
+}
+
+function selectOption(index: number, option: any) {
+  displayedContactsOptionEnrich.value[index] = option
+  dropdownVisibleState.value[index] = false // Hide dropdown after selection
+  enrichUser(index)
+}
 
 async function refreshPage() {
   showModal.value = false
@@ -511,32 +528,32 @@ const currentContactPhone = computed({
                   <thead>
                     <tr>
                       <th
-                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                        style="width: 15%;"
+                        class="px-2 py-1 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 16%;"
                       >
                         Name
                       </th>
                       <th
-                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                        style="width: 23%;"
+                        class="px-1 py-1 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 25%;"
                       >
                         Company
                       </th>
                       <th
-                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                        style="width: 16%;"
+                        class="px-1 py-1 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 17%;"
                       >
                         Email
                       </th>
                       <th
-                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                        style="width: 16%;"
+                        class="px-1 py-1 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 17%;"
                       >
                         Phone
                       </th>
                       <th
-                        class="px-5 py-3 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
-                        style="width: 20%;"
+                        class="px-1 py-1 text-xs font-semibold tracking-wider text-left text-gray-600 uppercase bg-gray-100 border-b-2 border-gray-200"
+                        style="width: 15%;"
                       >
                         Action
                       </th>
@@ -545,7 +562,7 @@ const currentContactPhone = computed({
                   <tbody>
                     <tr v-for="(u, index) in displayedContacts" :key="index">
                       <td
-                        class="px-5 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
+                        class="px-2 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
                       >
                         <div class="flex items-center">
                           <div class="flex-shrink-0 w-10 h-10">
@@ -567,7 +584,7 @@ const currentContactPhone = computed({
                         </div>
                       </td>
                       <td
-                        class="px-5 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
+                        class="px-1 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
                       >
                         <div class="max-w-md overflow-x-hidden">
                           <p v-if="u.company != null" class="text-gray-900 whitespace-nowrap font-bold">
@@ -579,7 +596,7 @@ const currentContactPhone = computed({
                         </div>
                       </td>
                       <td
-                        class="px-5 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
+                        class="px-1 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
                       >
                         <div v-if="u.email != null" class="flex flex-col items-start space-y-1">
                           <p
@@ -590,7 +607,7 @@ const currentContactPhone = computed({
                           </p>
                         </div>
                       </td>
-                      <td class="px-5 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden">
+                      <td class="px-1 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden">
                         <div class="flex flex-col items-start space-y-1">
                           <span
                             v-for="(phone, indexPhone) in u.phone.split('\n')"
@@ -601,19 +618,15 @@ const currentContactPhone = computed({
                           </span>
                         </div>
                       </td>
-                      <td class="px-5 py-5 text-sm bg-white border-b border-gray-200 relative">
+                      <td class="px-1 py-5 text-sm bg-white border-b border-gray-200 relative">
                         <div class="flex items-center justify-between">
                           <div class="flex items-center space-x-2">
                             <div class="relative">
-                              <select v-model="displayedContactsOptionEnrich[index]" class="px-3 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded shadow focus:outline-none focus:ring focus:border-blue-300">
-                                <option>Email</option>
-                                <option>Phone</option>
-                                <option>Both</option>
-                              </select>
-                            </div>
-
-                            <div class="relative flex flex-col items-center group">
-                              <button class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingEnrich[index]" @click="enrichUser(index)">
+                              <button
+                                class="px-3 py-1 text-xs text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring"
+                                :disabled="isLoadingEnrich[index]"
+                                @click="toggleDropdown(index)"
+                              >
                                 <div v-if="isLoadingEnrich[index]" class="flex items-center">
                                   <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -625,15 +638,15 @@ const currentContactPhone = computed({
                                   Enrich
                                 </div>
                               </button>
-
-                              <div class="absolute bottom-0 flex-col items-center hidden mb-6 group-hover:flex">
-                                <span class="relative z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-black shadow-lg">Find mail/phone</span>
-                                <div class="w-3 h-3 -mt-2 rotate-45 bg-black" />
+                              <div v-if="dropdownVisibleState[index]" class="absolute mt-1 bg-white border border-gray-300 rounded shadow-lg z-10">
+                                <div v-for="option in dropdownVisible" :key="option" class="px-3 py-1 text-xs text-gray-700 hover:bg-gray-200 cursor-pointer" @click="selectOption(index, option)">
+                                  {{ option }}
+                                </div>
                               </div>
                             </div>
 
                             <div class="relative flex flex-col items-center group">
-                              <button class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring ml-2" :disabled="isLoadingSync[index]" @click="syncUser(index)">
+                              <button class="px-3 py-1 text-xs text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring" :disabled="isLoadingSync[index]" @click="syncUser(index)">
                                 <div v-if="isLoadingSync[index]" class="flex items-center">
                                   <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -654,7 +667,7 @@ const currentContactPhone = computed({
 
                             <div class="relative flex flex-col items-center group">
                               <button
-                                class="px-3 py-1 text-xs text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none focus:ring ml-2"
+                                class="px-3 py-1 text-xs text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none focus:ring"
                                 @click="toggleModal($event, index)"
                               >
                                 Edit
