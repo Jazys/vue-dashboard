@@ -5,9 +5,9 @@ import endpoints from '../api/endpoints'
 import type { User } from '../types/apiTypes'
 
 const inputValues = ref([
-  { label: 'Enrich', value: '' },
-  { label: 'Phantombuster', value: '' },
-  { label: 'Hubspot', value: '' },
+  { label: 'Enrich', value: '', tooltip: 'Cliquez <a href="www.google.fr"  target="_blank">ici</a> pour enrichir les données.' },
+  { label: 'Phantombuster', value: '', tooltip: 'Cliquez <a href="#"  target="_blank">ici</a> pour accéder à Phantombuster.' },
+  { label: 'Hubspot', value: '', tooltip: 'Cliquez <a href="#"  target="_blank">ici</a> pour ouvrir Hubspot.' },
 ])
 
 const displaySuccess = ref(false)
@@ -16,9 +16,11 @@ const showCopyToast = ref(false)
 const toastCoordinates = ref({ x: 0, y: 0 })
 const isLoading = ref(false)
 const isLoadingPAccountAPI = ref(true)
+const tooltipURLApi = ref(false)
 
 const userId = ref(localStorage.getItem('user-id') || '')
 const userMail = ref(localStorage.getItem('user-email') || '')
+const showTooltip = ref(Array(inputValues.value.length).fill(false))
 
 onMounted(async () => {
   const response = await ApiService.get<User[]>(endpoints.getUser, { user: userId.value })
@@ -150,6 +152,18 @@ async function saveData() {
                 <div v-if="showCopyToast" class="absolute top-0 left-full ml-2 bg-blue-500 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300 ease-in-out" :class="{ 'opacity-0': !showCopyToast, 'opacity-100': showCopyToast }">
                   Copy in Clipboard
                 </div>
+                <span
+                  class="ml-1 cursor-pointer flex items-center justify-center rounded-full bg-blue-500 text-white w-5 h-5 hover:bg-blue-600"
+                  @mouseover="tooltipURLApi = true"
+                  @mouseleave="tooltipURLApi = false"
+                >
+                  ?
+                </span>
+                <!-- Tooltip -->
+                <div v-if="tooltipURLApi" class="absolute z-10 bg-gray-100 border border-gray-200 text-gray-700 rounded-md p-2 mt-2">
+                  <!-- Contenu du tooltip -->
+                  <span> Pour xxxx</span>
+                </div>
               </div>
             </div>
           </div>
@@ -171,11 +185,26 @@ async function saveData() {
           Account API <b v-if="isLoadingPAccountAPI"> (Loading ..)</b>
         </h2>
         <div v-for="(item, index) in inputValues" :key="index" class="flex flex-col space-y-2 mb-4">
-          <label :for="`copyInput${index}`" class="text-gray-700">{{ item.label }} :</label>
-          <div class="flex items-center space-x-2">
-            <input :id="`copyInput${index}`" v-model="item.value" type="text" class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500">
-          </div>
+          <label :for="`copyInput${index}`" class="text-gray-700 flex items-center">
+            {{ item.label }} :
+            <!-- Icône d'interrogation -->
+            <span
+              class="ml-1 cursor-pointer flex items-center justify-center rounded-full bg-blue-500 text-white w-5 h-5 hover:bg-blue-600"
+              @mouseover="showTooltip[index] = true"
+              @mouseleave="showTooltip[index] = false"
+            >
+              ?
+            </span>
+            <!-- Tooltip -->
+            <div v-if="showTooltip[index]" class="absolute z-10 bg-gray-100 border border-gray-200 text-gray-700 rounded-md p-2 mt-2">
+              <!-- Contenu du tooltip -->
+              <span v-html="item.tooltip" />
+            </div>
+          </label>
+          <!-- Champ d'entrée -->
+          <input :id="`copyInput${index}`" v-model="item.value" type="text" class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500">
         </div>
+
         <div class="flex justify-end">
           <button class="px-4 py-2 text-gray-200 bg-gray-800 rounded-md hover:bg-gray-700 focus:outline-none focus:bg-gray-700" :disabled="isLoading" @click="saveData">
             <div v-if="isLoading" class="flex items-center">
