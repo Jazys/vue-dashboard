@@ -33,4 +33,6 @@ export interface Contact {
   email: string
   action: string
   photo: string
+  note: string
+  tags: string[]
 }

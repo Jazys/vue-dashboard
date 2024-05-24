@@ -395,6 +395,14 @@ const currentContactPhone = computed({
       currentContact.value.phone = value
   },
 })
+
+const currentContactNote = computed({
+  get: () => currentContact.value?.note || '',
+  set: (value) => {
+    if (currentContact.value)
+      currentContact.value.note = value
+  },
+})
 </script>
 
 <template>
@@ -774,6 +782,15 @@ const currentContactPhone = computed({
               class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
               type="text"
             >
+          </div>
+
+          <div>
+            <label class="text-gray-700" for="username">Notes</label>
+            <textarea
+              v-model="currentContactNote"
+              class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500 resize-none"
+              rows="6"
+            />
           </div>
 
           <div class="mt-auto pt-4 space-y-4">
