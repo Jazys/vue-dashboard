@@ -37,6 +37,9 @@ const showUploadModal = ref(false)
 
 const titleModalCreateEdit = ref('')
 
+const tags = ref(['Nrp', 'Disqualifié', 'En cours'])
+const tagClicked = ref(Array(tags.value.length).fill(false))
+
 async function handleDataImported(data: any) {
   try {
     displaySuccess.value = true
@@ -102,6 +105,12 @@ function toggleModal(event: MouseEvent, index: number) {
   if (index !== -1) {
     messageSaveDisplay.value = 'Save'
     currentContact.value = displayedContacts.value[index]
+    if (currentContact.value && currentContact.value.tags)
+      tagClicked.value = tags.value.map(tag => currentContact.value!.tags.includes(tag))
+
+    else
+      tagClicked.value = []
+
     titleModalCreateEdit.value = 'Edit User'
   }
   else {
@@ -132,6 +141,8 @@ function toggleModal(event: MouseEvent, index: number) {
       email: '',
       action: '',
       photo: '',
+      tags: [],
+      note: '',
     }
 
     currentContact.value = newContact
@@ -403,6 +414,20 @@ const currentContactNote = computed({
       currentContact.value.note = value
   },
 })
+
+const currentContactTags = computed({
+  get: () => currentContact.value?.tags || [],
+  set: (value) => {
+    if (currentContact.value)
+      currentContact.value.tags = value
+  },
+})
+
+function toggleTag(index: number) {
+  const tagsLen = tags.value.length
+  tagClicked.value[index] = !tagClicked.value[index]
+  currentContact.value!.tags = tags.value.filter((tag, i) => tagClicked.value[i])
+}
 </script>
 
 <template>
@@ -791,6 +816,21 @@ const currentContactNote = computed({
               class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500 resize-none"
               rows="6"
             />
+          </div>
+
+          <div>
+            <label class="text-gray-700" for="tags">Tags</label>
+            <div class="mt-2 flex flex-wrap">
+              <span
+                v-for="(tag, index) in tags"
+                :key="index"
+                class="inline-block bg-gray-200 text-black-700 px-3 py-1 rounded-full text-sm mr-2 mb-2 cursor-pointer"
+                :class="{ 'bg-green-500 text-black': tagClicked[index] }"
+                @click="toggleTag(index)"
+              >
+                {{ tag }}
+              </span>
+            </div>
           </div>
 
           <div class="mt-auto pt-4 space-y-4">
