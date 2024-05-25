@@ -112,6 +112,8 @@ function toggleModal(event: MouseEvent, index: number) {
       tagClicked.value = []
 
     titleModalCreateEdit.value = 'Edit User'
+
+    console.log(currentContact.value)
   }
   else {
     const newContact: Contact = {
@@ -423,6 +425,14 @@ const currentContactTags = computed({
   },
 })
 
+const currentContactPhones = computed({
+  get: () => currentContact.value?.phones || [],
+  set: (value) => {
+    if (currentContact.value)
+      currentContact.value.phones = value
+  },
+})
+
 function toggleTag(index: number) {
   const tagsLen = tags.value.length
   tagClicked.value[index] = !tagClicked.value[index]
@@ -598,18 +608,19 @@ function toggleTag(index: number) {
                         class="px-2 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden"
                       >
                         <div class="flex items-center">
-                          <div class="flex-shrink-0 w-10 h-10">
+                          <a :href="u.linkedin_url" target="_blank" class="flex-shrink-0 w-10 h-10">
                             <img
                               class="w-full h-full rounded-full"
                               alt="profile pic"
                               :src="u.photo || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80'"
                             >
-                          </div>
-
+                          </a>
                           <div class="ml-3">
-                            <p class="text-gray-900 whitespace-nowrap font-bold">
-                              {{ u.name }}
-                            </p>
+                            <a :href="u.linkedin_url" target="_blank">
+                              <p class="text-gray-900 whitespace-nowrap font-bold">
+                                {{ u.name }}
+                              </p>
+                            </a>
                             <p class="text-gray-900 whitespace-nowrap">
                               {{ u.title.length > 30 ? `${u.title.substring(0, 30)}...` : u.title }}
                             </p>
@@ -621,7 +632,9 @@ function toggleTag(index: number) {
                       >
                         <div class="max-w-md overflow-x-hidden">
                           <p v-if="u.company != null" class="text-gray-900 whitespace-nowrap font-bold">
-                            {{ u.company.length > 40 ? `${u.company.substring(0, 40)}...` : u.company }}
+                            <a :href="u.linkedin_company_url" target="_blank">
+                              {{ u.company.length > 40 ? `${u.company.substring(0, 40)}...` : u.company }}
+                            </a>
                           </p>
                           <p v-if="u.industry != null" class="text-gray-900 whitespace-nowrap">
                             {{ u.industry.length > 40 ? `${u.industry.substring(0, 40)}...` : u.industry }}
@@ -643,11 +656,11 @@ function toggleTag(index: number) {
                       <td class="px-1 py-5 text-sm bg-white border-b border-gray-200 overflow-hidden">
                         <div class="flex flex-col items-start space-y-1">
                           <span
-                            v-for="(phone, indexPhone) in u.phone.split('\n')"
-                            v-if="u.phone != null" :key="indexPhone"
+                            v-for="(phone, indexPhone) in u.phones"
+                            :key="indexPhone"
                             :class="`relative inline-block px-3 py-1 font-semibold text-${u.title}-900 leading-tight`"
                           >
-                            <a :href="`tel:${phone.trim()}`">{{ phone.trim() }}</a>
+                            <a :href="`tel:${phone.value.trim()}`">{{ phone.value.trim() }}</a>
                           </span>
                         </div>
                       </td>
@@ -802,11 +815,13 @@ function toggleTag(index: number) {
 
           <div>
             <label class="text-gray-700" for="username">Phone</label>
-            <input
-              v-model="currentContactPhone"
-              class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
-              type="text"
-            >
+            <div v-for="(phone, index) in currentContactPhones" :key="index">
+              <input
+                v-model="currentContactPhones[index].value"
+                class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500"
+                type="text"
+              >
+            </div>
           </div>
 
           <div>
@@ -814,7 +829,7 @@ function toggleTag(index: number) {
             <textarea
               v-model="currentContactNote"
               class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500 resize-none"
-              rows="6"
+              rows="4"
             />
           </div>
 

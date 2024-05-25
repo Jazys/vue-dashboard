@@ -35,4 +35,18 @@ export interface Contact {
   photo: string
   note: string
   tags: string[]
+  phones: Phone[]
+  emails: Email[]
+}
+
+interface Phone {
+  value: string
+  type: string
+  wrong: boolean | null
+}
+
+interface Email {
+  value: string
+  type: string
+  wrong: boolean | null
 }
