@@ -929,10 +929,6 @@ function toggleTag(index: number) {
 </template>
 
 <style scoped>
-.custom-modal-background {
-  background: url('/path-to-your-background-image.png') repeat;
-}
-
 .custom-inner-background {
   background-color: white;
 }
