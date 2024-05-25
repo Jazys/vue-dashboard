@@ -102,6 +102,12 @@ async function refreshPage() {
 
 function toggleModal(event: MouseEvent, index: number) {
   event.preventDefault()
+
+  if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
+    showModal.value = false
+    return
+  }
+
   if (index !== -1) {
     messageSaveDisplay.value = 'Save'
     currentContact.value = displayedContacts.value[index]
@@ -112,8 +118,6 @@ function toggleModal(event: MouseEvent, index: number) {
       tagClicked.value = []
 
     titleModalCreateEdit.value = 'Edit User'
-
-    console.log(currentContact.value)
   }
   else {
     const newContact: Contact = {
@@ -758,10 +762,9 @@ function toggleTag(index: number) {
       <UploadContact v-if="showUploadModal" :user-id="userId" @close-modal="showUploadModal = false" @data-imported="handleDataImported" />
 
       <!-- Overlay -->
-      <div v-if="showModal" class="fixed inset-0 z-40 bg-gray-600 bg-opacity-50" />
+      <div v-if="showModal" class="fixed inset-0 z-40 bg-gray-600 bg-opacity-50 modal-overlay" @click="toggleModal($event, -1)" />
 
       <!-- Modal à droite prenant toute la hauteur -->
-
       <div v-if="showModal" class="fixed top-0 right-0 bottom-0 z-50 overflow-auto custom-inner-background">
         <div class="relative bg-white p-8 w-full sm:w-auto h-full flex flex-col rounded-l-lg shadow-lg custom-inner-background">
           <!-- En-tête de la modal -->
@@ -769,7 +772,7 @@ function toggleTag(index: number) {
             <p class="text-2xl font-bold">
               {{ titleModalCreateEdit }}
             </p>
-            <button class="p-2 bg-blue-500 rounded-full inline-flex items-center justify-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="toggleModal($event, -1)">
+            <button class="p-2 bg-blue-500 rounded-full inline-flex items-center justify-center text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" @click="showModal = false">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" class="fill-current">
                 <path d="M12.707 11.293l-1.414 1.414L9 10.414l-2.293 2.293-1.414-1.414L7.586 9 5.293 6.707l1.414-1.414L9 7.586l2.293-2.293 1.414 1.414L10.414 9l2.293 2.293z" />
               </svg>
