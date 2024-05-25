@@ -22,6 +22,8 @@ const userId = ref(localStorage.getItem('user-id') || '')
 const userMail = ref(localStorage.getItem('user-email') || '')
 const showTooltip = ref(Array(inputValues.value.length).fill(false))
 
+const tooltipWebhook = ref('Pour traiter les données XXX')
+
 onMounted(async () => {
   const response = await ApiService.get<User[]>(endpoints.getUser, { user: userId.value })
   if (response != null && response.length === 1) {
@@ -160,9 +162,9 @@ async function saveData() {
                   ?
                 </span>
                 <!-- Tooltip -->
-                <div v-if="tooltipURLApi" class="absolute z-10 bg-gray-100 border border-gray-200 text-gray-700 rounded-md p-2 mt-2">
+                <div v-if="tooltipURLApi" class="absolute z-10 bg-gray-100 border border-gray-200 text-gray-700 rounded-md p-2 mt-2 ml-1">
                   <!-- Contenu du tooltip -->
-                  <span> Pour xxxx</span>
+                  <span> {{ tooltipWebhook }}</span>
                 </div>
               </div>
             </div>

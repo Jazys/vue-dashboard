@@ -14,6 +14,8 @@ const inactiveClass = ref(
 const activeIconClass = ref('text-gray-100')
 const inactiveIconClass = ref('text-gray-500 hover:text-gray-100')
 
+const whatsappSupport = ref('https://wa.me/1234567890')
+
 // État pour contrôler l'affichage du texte au survol
 const showText = ref(false)
 
@@ -86,8 +88,20 @@ function toggleSidebar() {
         </router-link>
       </nav>
 
+      <!-- WhatsApp Support Button -->
+      <a
+        :href="whatsappSupport"
+        class="p-2 m-4 bg-green-500 text-white fixed bottom-20 left-0 mb-4 ml-4 rounded-full shadow-lg hover:bg-green-600"
+        aria-label="WhatsApp Support"
+        target="_blank"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.12.553 4.107 1.514 5.855L0 24l6.32-1.548A11.936 11.936 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm6.807 17.224c-.274.771-1.352 1.442-2.116 1.535-.566.07-1.268.1-2.03-.314-.947-.482-1.577-1.238-2.155-1.406-.559-.165-1.274-.08-1.792.124-2.83 1.072-5.313-2.286-5.813-4.633-.073-.336-.09-.872.077-1.337.183-.497.645-1.086 1.18-1.337.353-.164.812-.232 1.277-.032.436.186.94.742 1.07 1.176.133.443-.112.803-.271 1.007-.245.315-.642.818-.439 1.18.383.684 1.531 2.439 3.586 2.793.236.05.572-.194.897-.556.251-.288.718-.727 1.118-.584.413.147.942.545 1.168.773.334.343.56.748.62 1.122.092.562.018 1.03-.07 1.214z" />
+        </svg>
+      </a>
+
       <button
-        class="p-2 m-4 bg-blue-900 text-white fixed bottom-0 right-0 mb-4 mr-4 rounded-full shadow-lg hover:bg-blue-600"
+        class="p-2 m-4 bg-blue-900 text-white fixed bottom-0 left-0 mb-4 ml-4 rounded-full shadow-lg hover:bg-blue-600"
         aria-label="Toggle Sidebar"
         @click="toggleSidebar"
       >
