@@ -174,23 +174,37 @@ async function getListAll() {
 }
 
 function updateDisplayedContacts() {
+  // Filtrer les contacts selon la requête de recherche
   const filteredContacts = allContacts.value.filter((contact) => {
     if (searchQuery.value.trim() === '')
-      return true // Ne filtre pas, inclut tous les contacts
-
-    // Effectue le filtrage si searchQuery est non vide
+      return true // Inclut tous les contacts si la recherche est vide
     if (contact.name != null)
       return contact.name.toLowerCase().includes(searchQuery.value.toLowerCase())
 
     return false
   })
+
+  // Mettre à jour le nombre total d'entrées filtrées
   totalEntries.value = filteredContacts.length
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = start + pageSize.value
-  displayedContacts.value = filteredContacts.slice(start, end)
-  displayedContactsOptionEnrich.value = Array(pageSize.value).fill('Both')
-  isLoadingEnrich.value = Array(pageSize.value).fill(false)
-  isLoadingSync.value = Array(pageSize.value).fill(false)
+
+  // Convertir pageSize.value en nombre si nécessaire
+  const pageSizeNumber = Number(pageSize.value)
+  const currentPageNumber = Number(currentPage.value)
+
+  // Recalculer la page courante si nécessaire
+  const totalPages = Math.ceil(totalEntries.value / pageSizeNumber)
+  if (currentPageNumber > totalPages)
+    currentPage.value = totalPages
+
+  // Calculer les indices de début et de fin pour les contacts affichés
+  const start = (currentPageNumber - 1) * pageSizeNumber
+  const end = start + pageSizeNumber
+
+  // Mettre à jour les contacts affichés et les états associés
+  displayedContacts.value = filteredContacts.slice(start, Math.min(end, totalEntries.value))
+  displayedContactsOptionEnrich.value = Array(pageSizeNumber).fill('Both')
+  isLoadingEnrich.value = Array(pageSizeNumber).fill(false)
+  isLoadingSync.value = Array(pageSizeNumber).fill(false)
 }
 
 function nextPage() {
