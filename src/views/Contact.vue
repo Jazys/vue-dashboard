@@ -647,7 +647,7 @@ function toggleTag(index: number) {
                               </p>
                             </a>
                             <p class="text-gray-900 whitespace-nowrap">
-                              {{ u.title.length > 30 ? `${u.title.substring(0, 30)}...` : u.title }}
+                              {{ u.title !== null && u.title.length > 30 ? `${u.title.substring(0, 30)}...` : u.title }}
                             </p>
                           </div>
                         </div>
