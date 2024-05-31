@@ -3,11 +3,12 @@ import { onMounted, ref } from 'vue'
 import ApiService from '../api/ApiService'
 import endpoints from '../api/endpoints'
 import type { User } from '../types/apiTypes'
+import Modal from './ModalTooltip.vue'
 
 const inputValues = ref([
-  { label: 'Enrich', value: '', tooltip: 'Cliquez <a href="www.google.fr"  target="_blank">ici</a> pour enrichir les données.' },
-  { label: 'Phantombuster', value: '', tooltip: 'Cliquez <a href="#"  target="_blank">ici</a> pour accéder à Phantombuster.' },
-  { label: 'Hubspot', value: '', tooltip: 'Cliquez <a href="#"  target="_blank">ici</a> pour ouvrir Hubspot.' },
+  { label: 'Enrich', value: '', tooltip: 'You can eather use Kaspr or FullEnrich API (but not both) to enrich your data', loom: 'https://www.loom.com/embed/d891dbfa7a5e4849bc64a31ef6e88215?sid=a3d18411-2189-40da-b943-ec65bd13ae7f' },
+  { label: 'Phantombuster', value: '', tooltip: 'We explain how to get your phantombuster API key here', loom: 'https://www.loom.com/embed/8f13ff3ae7f041e0bb73dedb621d7ccd?sid=e1c38b23-c7a0-4bbe-b23b-c1e83a8fce7a' },
+  { label: 'Hubspot', value: '', tooltip: 'PRECRM needs to have the following scopes: crm.objects.contacts.read and crm.objects.contacts.write.', loom: 'https://www.loom.com/embed/b1bc2044199e41d7bb74b3d2dc77f4b0?sid=8387baf4-efda-48fa-811b-7e39dde9f90d' },
 ])
 
 const displaySuccess = ref(false)
@@ -22,7 +23,19 @@ const userId = ref(localStorage.getItem('user-id') || '')
 const userMail = ref(localStorage.getItem('user-email') || '')
 const showTooltip = ref(Array(inputValues.value.length).fill(false))
 
-const tooltipWebhook = ref('Pour traiter les données XXX')
+const tooltipWebhook = ref('Webhook to specify for Phantombuster to deal with PRECRM')
+
+const isModalVisible = ref(false)
+const modalTitle = ref('')
+const modalDescription = ref('')
+const modalVideoUrl = ref('')
+
+function openTooltipModal(title: string, description: string, videoUrl: string) {
+  modalTitle.value = title
+  modalDescription.value = description
+  modalVideoUrl.value = videoUrl
+  isModalVisible.value = true
+}
 
 onMounted(async () => {
   const response = await ApiService.get<User[]>(endpoints.getUser, { user: userId.value })
@@ -156,16 +169,11 @@ async function saveData() {
                 </div>
                 <span
                   class="ml-1 cursor-pointer flex items-center justify-center rounded-full bg-blue-500 text-white w-5 h-5 hover:bg-blue-600"
-                  @mouseover="tooltipURLApi = true"
-                  @mouseleave="tooltipURLApi = false"
+                  @click="openTooltipModal('Webhook URL Explanation', tooltipWebhook, 'https://www.loom.com/embed/8f13ff3ae7f041e0bb73dedb621d7ccd?sid=e1c38b23-c7a0-4bbe-b23b-c1e83a8fce7a')"
+                  @mouseover="openTooltipModal('Webhook URL Explanation', tooltipWebhook, 'https://www.loom.com/embed/8f13ff3ae7f041e0bb73dedb621d7ccd?sid=e1c38b23-c7a0-4bbe-b23b-c1e83a8fce7a')"
                 >
                   ?
                 </span>
-                <!-- Tooltip -->
-                <div v-if="tooltipURLApi" class="absolute z-10 bg-gray-100 border border-gray-200 text-gray-700 rounded-md p-2 mt-2 ml-1">
-                  <!-- Contenu du tooltip -->
-                  <span> {{ tooltipWebhook }}</span>
-                </div>
               </div>
             </div>
           </div>
@@ -192,16 +200,11 @@ async function saveData() {
             <!-- Icône d'interrogation -->
             <span
               class="ml-1 cursor-pointer flex items-center justify-center rounded-full bg-blue-500 text-white w-5 h-5 hover:bg-blue-600"
-              @mouseover="showTooltip[index] = true"
-              @mouseleave="showTooltip[index] = false"
+              @click="openTooltipModal(item.label, item.tooltip, item.loom)"
+              @mouseover="openTooltipModal(item.label, item.tooltip, item.loom)"
             >
               ?
             </span>
-            <!-- Tooltip -->
-            <div v-if="showTooltip[index]" class="absolute z-10 bg-gray-100 border border-gray-200 text-gray-700 rounded-md p-2 mt-2">
-              <!-- Contenu du tooltip -->
-              <span v-html="item.tooltip" />
-            </div>
           </label>
           <!-- Champ d'entrée -->
           <input :id="`copyInput${index}`" v-model="item.value" type="text" class="w-full mt-2 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500">
@@ -223,5 +226,14 @@ async function saveData() {
         </div>
       </div>
     </div>
+
+    <!-- Modal Component -->
+    <Modal
+      :is-visible="isModalVisible"
+      :title="modalTitle"
+      :description="modalDescription"
+      :video-url="modalVideoUrl"
+      @close="isModalVisible = false"
+    />
   </div>
 </template>

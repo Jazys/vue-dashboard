@@ -10,7 +10,7 @@ const mail = ref('')
 
 const titleLanding = 'PreCRM'
 const heroTitle = 'Simplify your growth ops'
-const heroMessage = 'Synchronize your favorite tool\'s data in one place :'
+const heroMessage = 'Synchronize your favorite tool\'s data in one place and make your own Call Center with :'
 const bulletsInfo = ref(['Phantombuster', 'Fullenrich', 'HubSpot'])
 
 const headerSimpleLink = ref([])
@@ -156,7 +156,11 @@ onBeforeUnmount(() => {
         </div>
         <!-- Right Column -->
         <div class="w-full md:w-3/5 py-6 flex justify-center items-center relative">
-          <img src="../assets/hero2.png" alt="Hero Image" class="relative z-0">
+          <video class="relative z-0" width="1480" height="960" controls>
+            <source src="/hero_video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+          <!-- <img src="../assets/hero2.png" alt="Hero Image" class="relative z-0"> -->
         </div>
       </div>
     </div>
@@ -235,7 +239,7 @@ onBeforeUnmount(() => {
             </p>
           </div>
           <div class="w-full sm:w-1/2 p-6">
-            <img class="w-full sm:h-64 mx-auto" src="../assets/feature1.png" alt="Hero Image">
+            <img class="w-full sm:h-64 mx-auto" src="../assets/hero2.png" alt="Hero Image">
           </div>
         </div>
         <div class="flex flex-wrap flex-col-reverse sm:flex-row">

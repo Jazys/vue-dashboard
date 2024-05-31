@@ -14,7 +14,7 @@ const inactiveClass = ref(
 const activeIconClass = ref('text-gray-100')
 const inactiveIconClass = ref('text-gray-500 hover:text-gray-100')
 
-const whatsappSupport = ref('https://wa.me/1234567890')
+const whatsappSupport = ref('https://wa.me/33756798439')
 
 // État pour contrôler l'affichage du texte au survol
 const showText = ref(false)
@@ -48,8 +48,14 @@ function toggleSidebar() {
     >
       <div class="flex items-center justify-center mt-8">
         <div class="flex items-center">
-          <img src="../assets/favicon.png" alt="alternate text">
-          <span v-if="isExpanded" class="mx-2 text-2xl font-semibold text-white">PreCRM</span>
+          <router-link
+            class="flex items-center"
+            :class="[$route.name === 'Dashboard' ? activeClass : inactiveClass]"
+            to="/dashboard"
+          >
+            <img src="../assets/favicon.png" alt="alternate text">
+            <span v-if="isExpanded" class="mx-2 text-2xl font-semibold text-white">PreCRM</span>
+          </router-link>
         </div>
       </div>
 
