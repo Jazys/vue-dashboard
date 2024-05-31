@@ -156,10 +156,12 @@ onBeforeUnmount(() => {
         </div>
         <!-- Right Column -->
         <div class="w-full md:w-3/5 py-6 flex justify-center items-center relative">
-          <video class="relative z-0" width="1480" height="960" controls>
-            <source src="/hero_video.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
+          <div class="video-container">
+            <video width="100%" height="100%" controls loop>
+              <source src="/hero_video.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
           <!-- <img src="../assets/hero2.png" alt="Hero Image" class="relative z-0"> -->
         </div>
       </div>
@@ -709,4 +711,18 @@ onBeforeUnmount(() => {
 .gradient {
   background: linear-gradient(90deg, #4333d5 0%, #51da51 100%);
 }
+
+.video-container {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    }
+    .video-container video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+    }
 </style>

@@ -111,6 +111,13 @@ function toggleModal(event: MouseEvent, index: number) {
   if (index !== -1) {
     messageSaveDisplay.value = 'Save'
     currentContact.value = displayedContacts.value[index]
+    if (currentContact.value.phones && currentContact.value.phones.length === 0) {
+      currentContact.value.phones = [{
+        value: '+0000000000',
+        type: 'string',
+        wrong: true,
+      }]
+    }
     if (currentContact.value && currentContact.value.tags)
       tagClicked.value = tags.value.map(tag => currentContact.value!.tags.includes(tag))
 
@@ -148,7 +155,11 @@ function toggleModal(event: MouseEvent, index: number) {
       action: '',
       photo: '',
       tags: [],
-      phones: [],
+      phones: [{
+        value: '+0000000000',
+        type: 'string',
+        wrong: true,
+      }],
       emails: [],
       note: '',
     }
@@ -451,7 +462,11 @@ const currentContactTags = computed({
 })
 
 const currentContactPhones = computed({
-  get: () => currentContact.value?.phones || [],
+  get: () => currentContact.value?.phones || [{
+    value: '+0000000000',
+    type: 'string',
+    wrong: true,
+  }],
   set: (value) => {
     if (currentContact.value)
       currentContact.value.phones = value
