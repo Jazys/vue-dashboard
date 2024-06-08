@@ -7,6 +7,7 @@ import './assets/main.css'
 import DashboardLayout from './components/DashboardLayout.vue'
 import EmptyLayout from './components/EmptyLayout.vue'
 import ApiService from './api/ApiService'
+import { setupAuthInterceptor } from './authInterceptor'
 
 const pinia = createPinia()
 
@@ -28,4 +29,5 @@ if (import.meta.env.VITE_ENABLE_AUTH0 === 'true') {
 app.component('DefaultLayout', DashboardLayout)
 app.component('EmptyLayout', EmptyLayout)
 app.use(router)
+setupAuthInterceptor()
 app.mount('#app')

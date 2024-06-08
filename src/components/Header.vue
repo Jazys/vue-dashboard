@@ -3,16 +3,25 @@ import { ref } from 'vue'
 import { useAuth0 } from '@auth0/auth0-vue'
 import { useSidebar } from '../composables/useSidebar'
 import kobbleClient from '../lib/kobbleClient'
+import { supabase } from '../supabase'
+import router from '../router'
 import Credits from './Credits.vue'
 
 async function logout() {
   localStorage.removeItem('bearer-token')
+  localStorage.removeItem('refresh-token')
   if (import.meta.env.VITE_ENABLE_AUTH_KOBBLE === 'true')
     await kobbleClient.logout()
 
   if (import.meta.env.VITE_ENABLE_AUTH0 === 'true') {
     const { logout, isAuthenticated } = useAuth0()
     logout({ logoutParams: { returnTo: window.location.origin } })
+  }
+
+  if (import.meta.env.VITE_ENABLE_SUPABASE === 'true') {
+    await supabase.auth.signOut()
+    localStorage.removeItem('supabase_refresh_token')
+    router.push('/login')
   }
 }
 
