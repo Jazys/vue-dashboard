@@ -7,9 +7,15 @@ const email = ref('')
 const password = ref('')
 const error = ref<string | null>(null)
 const success = ref<string | null>(null)
+const isRecovery = ref(false)
+const isLoading = ref(false)
 
 onMounted(async () => {
-  await checkSession()
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.get('type') === 'recovery')
+    isRecovery.value = true
+  else
+    await checkSession()
 })
 
 async function checkSession() {
@@ -37,10 +43,13 @@ async function checkSession() {
 async function handleSignUp() {
   error.value = null
   success.value = null
+  isLoading.value = true
   const { data, error: signUpError } = await supabase.auth.signUp({
     email: email.value,
     password: password.value,
   })
+
+  isLoading.value = false
 
   if (signUpError) {
     error.value = signUpError.message
@@ -59,10 +68,13 @@ async function handleSignUp() {
 
 async function handleSignIn() {
   error.value = null
+  isLoading.value = true
   const { data, error: signUpError } = await supabase.auth.signInWithPassword({
     email: email.value,
     password: password.value,
   })
+
+  isLoading.value = false
 
   if (signUpError) {
     error.value = signUpError.message
@@ -78,12 +90,37 @@ async function handleSignIn() {
 async function resetPassword() {
   success.value = null
   error.value = null
-  const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.value)
+  isLoading.value = true
+  const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.value, {
+    redirectTo: `${window.location.origin}/login?type=recovery`,
+  })
+
+  isLoading.value = false
 
   if (resetError)
     error.value = resetError.message
   else
     success.value = 'A reset link has been sent to your email address.'
+}
+
+async function updatePassword() {
+  isLoading.value = true
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: password.value,
+  })
+  isLoading.value = false
+
+  if (updateError) {
+    error.value = updateError.message
+  }
+  else {
+    success.value = 'Your password has been updated successfully.'
+    setTimeout(() => {
+      success.value = ''
+      isRecovery.value = false
+      router.push('/login')
+    }, 3000)
+  }
 }
 </script>
 
@@ -96,7 +133,7 @@ async function resetPassword() {
       </div>
 
       <form class="mt-4">
-        <label class="block">
+        <label v-if="!isRecovery" class="block">
           <span class="text-sm text-gray-700">Email</span>
           <input
             v-model="email"
@@ -114,7 +151,7 @@ async function resetPassword() {
           >
         </label>
 
-        <div class="flex items-center justify-between mt-4">
+        <div v-if="!isRecovery" class="flex items-center justify-between mt-4">
           <div>
             <label class="inline-flex items-center">
               <input type="checkbox" class="text-indigo-600 border-gray-200 rounded-md focus:border-indigo-600 focus:ring focus:ring-opacity-40 focus:ring-indigo-500">
@@ -122,7 +159,7 @@ async function resetPassword() {
             </label>
           </div>
 
-          <div>
+          <div v-if="!isRecovery">
             <a
               class="block text-sm text-indigo-700 fontme hover:underline"
               href="#"
@@ -131,7 +168,7 @@ async function resetPassword() {
           </div>
         </div>
 
-        <div class="mt-6 flex justify-between">
+        <div v-if="!isRecovery" class="mt-6 flex justify-between">
           <button
             type="button"
             class="w-1/2 mr-2 px-4 py-2 text-sm text-center text-white bg-indigo-600 rounded-md focus:outline-none hover:bg-indigo-500"
@@ -148,6 +185,19 @@ async function resetPassword() {
           </button>
         </div>
 
+        <div v-if="isRecovery" class="mt-6 flex justify-between">
+          <button
+            type="button"
+            class="w-1/2 mr-2 px-4 py-2 text-sm text-center text-white bg-indigo-600 rounded-md focus:outline-none hover:bg-indigo-500"
+            @click="updatePassword"
+          >
+            update Password
+          </button>
+        </div>
+
+        <p v-if="isLoading" class="mt-4 text-red-500">
+          Loading ...
+        </p>
         <p v-if="error" class="mt-4 text-red-500">
           {{ error }}
         </p>
